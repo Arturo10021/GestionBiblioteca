@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Frontend/Frontend.csproj" />
+  <Project Path="ServicioPrestamo/ServicioPrestamo.csproj" />
+  <Project Path="ServicioUsuario/ServicioUsuario.csproj" />
+</Solution>
