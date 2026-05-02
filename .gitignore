@@ -1,2 +1,11 @@
-# Ignore Visual Studio folder
+## Visual Studio / .NET
+[Bb]in/
+[Ob]j/
 .vs/
+.user
+*.user
+*.suo
+*.sln.docstates
+
+## Archivos de publicación
+publish/
