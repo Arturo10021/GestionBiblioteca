@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "g8yWnXEIXiM=",
+  "dgSpecHash": "faVj+KKXgIo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ASUS\\source\\repos\\GestionBiblioteca\\ServicioPrestamo\\ServicioPrestamo.csproj",
+  "projectFilePath": "C:\\Users\\GIGABYTE\\source\\repos\\GestionBiblioteca\\ServicioPrestamo\\ServicioPrestamo.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\ASUS\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.5\\microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512",
-    "C:\\Users\\ASUS\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+    "C:\\Users\\GIGABYTE\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.5\\microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512",
+    "C:\\Users\\GIGABYTE\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
   ],
   "logs": []
 }
