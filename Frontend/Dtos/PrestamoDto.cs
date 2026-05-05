@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace gestion_bibliotecaria.Aplicacion.Dtos;
+namespace Frontend.Dtos;
 
 public class PrestamoDto
 {

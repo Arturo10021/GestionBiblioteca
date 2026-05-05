@@ -1,4 +1,4 @@
-namespace gestion_bibliotecaria.Aplicacion.DTOs;
+﻿namespace Frontend.Dtos;
 
 public class PrestamoDetalleDTO
 {
