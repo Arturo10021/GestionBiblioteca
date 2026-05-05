@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\GIGABYTE\\source\\repos\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj": {}
+    "C:\\Users\\blink\\OneDrive\\Documentos\\arqSot\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj": {}
   },
   "projects": {
-    "C:\\Users\\GIGABYTE\\source\\repos\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj": {
+    "C:\\Users\\blink\\OneDrive\\Documentos\\arqSot\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\GIGABYTE\\source\\repos\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj",
+        "projectUniqueName": "C:\\Users\\blink\\OneDrive\\Documentos\\arqSot\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj",
         "projectName": "ServicioUsuario",
-        "projectPath": "C:\\Users\\GIGABYTE\\source\\repos\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj",
-        "packagesPath": "C:\\Users\\GIGABYTE\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\GIGABYTE\\source\\repos\\GestionBiblioteca\\ServicioUsuario\\obj\\",
+        "projectPath": "C:\\Users\\blink\\OneDrive\\Documentos\\arqSot\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj",
+        "packagesPath": "C:\\Users\\blink\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\blink\\OneDrive\\Documentos\\arqSot\\GestionBiblioteca\\ServicioUsuario\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\GIGABYTE\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\blink\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -50,9 +44,21 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.5, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.3.0, )"
+            },
+            "Scalar.AspNetCore": {
+              "target": "Package",
+              "version": "[1.2.56, )"
             }
           },
           "imports": [
