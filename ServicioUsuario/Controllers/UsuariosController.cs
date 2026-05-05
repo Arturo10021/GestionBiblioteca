@@ -84,4 +84,15 @@ public class UsuariosController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<UsuarioDto>> Login([FromBody] LoginDto dto)
+    {
+        var usuario = await _usuarioService.LoginAsync(dto.NombreUsuario, dto.Password);
+        if (usuario == null)
+            return Unauthorized(new { message = "Credenciales inválidas" });
+        return Ok(usuario);
+    }
 }
+
+public record LoginDto(string NombreUsuario, string Password);
