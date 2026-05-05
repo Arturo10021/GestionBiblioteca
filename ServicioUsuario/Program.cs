@@ -1,9 +1,11 @@
 using Scalar.AspNetCore;
+using ServicioUsuario.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<IUsuarioService, UsuarioService>();
 
 var app = builder.Build();
 

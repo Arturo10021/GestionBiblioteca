@@ -12,6 +12,7 @@ public interface IUsuarioService
     Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto);
     Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto);
     Task<bool> DeleteAsync(int id);
+    Task<UsuarioDto?> LoginAsync(string nombreUsuario, string password);
 }
 
 public class UsuarioService : IUsuarioService
@@ -26,23 +27,23 @@ public class UsuarioService : IUsuarioService
             {
                 UsuarioId = 1,
                 CI = "12345678",
-                Nombres = "Juan",
-                PrimerApellido = "Pérez",
-                SegundoApellido = "García",
-                Email = "juan.perez@example.com",
-                NombreUsuario = "jperez",
-                Rol = "Administrador",
+                Nombres = "Admin",
+                PrimerApellido = "Sistema",
+                Email = "admin@biblioteca.com",
+                NombreUsuario = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
+                Rol = "Admin",
                 Estado = true
             },
             new Usuario
             {
                 UsuarioId = 2,
                 CI = "87654321",
-                Nombres = "María",
-                PrimerApellido = "López",
-                SegundoApellido = "Martínez",
-                Email = "maria.lopez@example.com",
-                NombreUsuario = "mlopez",
+                Nombres = "Biblio",
+                PrimerApellido = "Biblioteca",
+                Email = "biblio@biblioteca.com",
+                NombreUsuario = "biblio",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("biblio"),
                 Rol = "Bibliotecario",
                 Estado = true
             }
@@ -124,6 +125,17 @@ public class UsuarioService : IUsuarioService
 
         usuario.Estado = false;
         return Task.FromResult(true);
+    }
+
+    public Task<UsuarioDto?> LoginAsync(string nombreUsuario, string password)
+    {
+        var usuario = _usuarios.FirstOrDefault(u =>
+            u.NombreUsuario == nombreUsuario &&
+            u.Estado &&
+            u.PasswordHash != null &&
+            BCrypt.Net.BCrypt.Verify(password, u.PasswordHash));
+
+        return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
     }
 
     private UsuarioDto MapToDto(Usuario usuario)

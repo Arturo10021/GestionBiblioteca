@@ -1,4 +1,4 @@
-﻿namespace gestion_bibliotecaria.Domain.Entities;
+﻿namespace ServicioPrestamo.Domain.Entities;
 
 public class Ejemplar
 {
