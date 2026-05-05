@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "trq7KC4N1/c=",
+  "dgSpecHash": "CSaFTBFMswY=",
   "success": true,
   "projectFilePath": "C:\\Users\\blink\\OneDrive\\Documentos\\arqSot\\GestionBiblioteca\\ServicioUsuario\\ServicioUsuario.csproj",
   "expectedPackageFiles": [
@@ -15,6 +15,7 @@
     "C:\\Users\\blink\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512",
     "C:\\Users\\blink\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
     "C:\\Users\\blink\\.nuget\\packages\\mysql.data\\8.3.0\\mysql.data.8.3.0.nupkg.sha512",
+    "C:\\Users\\blink\\.nuget\\packages\\scalar.aspnetcore\\1.2.56\\scalar.aspnetcore.1.2.56.nupkg.sha512",
     "C:\\Users\\blink\\.nuget\\packages\\system.configuration.configurationmanager\\4.4.1\\system.configuration.configurationmanager.4.4.1.nupkg.sha512",
     "C:\\Users\\blink\\.nuget\\packages\\system.drawing.common\\4.7.0\\system.drawing.common.4.7.0.nupkg.sha512",
     "C:\\Users\\blink\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.4.0\\system.security.cryptography.protecteddata.4.4.0.nupkg.sha512",

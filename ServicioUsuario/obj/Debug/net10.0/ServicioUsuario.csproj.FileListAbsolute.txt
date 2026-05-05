@@ -56,3 +56,4 @@ C:\Users\blink\OneDrive\Documentos\arqSot\GestionBiblioteca\ServicioUsuario\obj\
 C:\Users\blink\OneDrive\Documentos\arqSot\GestionBiblioteca\ServicioUsuario\obj\Debug\net10.0\ServicioUsuario.pdb
 C:\Users\blink\OneDrive\Documentos\arqSot\GestionBiblioteca\ServicioUsuario\obj\Debug\net10.0\ServicioUsuario.genruntimeconfig.cache
 C:\Users\blink\OneDrive\Documentos\arqSot\GestionBiblioteca\ServicioUsuario\obj\Debug\net10.0\ref\ServicioUsuario.dll
+C:\Users\blink\OneDrive\Documentos\arqSot\GestionBiblioteca\ServicioUsuario\bin\Debug\net10.0\Scalar.AspNetCore.dll
