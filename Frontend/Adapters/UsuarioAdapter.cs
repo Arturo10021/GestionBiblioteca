@@ -40,6 +40,9 @@ public class UsuarioAdapter : IUsuarioServicio
     {
         try
         {
+            d.Nombres = d.Nombres.ToDisplayName();
+            d.PrimerApellido = d.PrimerApellido.ToDisplayName();
+            d.SegundoApellido = d.SegundoApellido.ToDisplayName();
             var response = _http.PostAsJsonAsync("api/usuarios", d).Result;
             if (!response.IsSuccessStatusCode)
                 return Result<UsuarioDto>.Failure(new Error("Create", "Error al crear usuario"));
@@ -63,9 +66,9 @@ public class UsuarioAdapter : IUsuarioServicio
                 NombreUsuario = !string.IsNullOrWhiteSpace(ciCompleto)
                     ? ciCompleto
                     : d.Nombres,
-                Nombres = d.Nombres,
-                PrimerApellido = d.PrimerApellido,
-                SegundoApellido = d.SegundoApellido,
+                Nombres = d.Nombres.ToDisplayName(),
+                PrimerApellido = d.PrimerApellido.ToDisplayName(),
+                SegundoApellido = d.SegundoApellido.ToDisplayName(),
                 Email = d.Email,
                 CI = ciCompleto,
                 Rol = "Lector",

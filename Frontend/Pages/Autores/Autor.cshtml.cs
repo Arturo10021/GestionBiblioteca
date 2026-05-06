@@ -48,6 +48,9 @@ public class AutorModel : PageModel
         
         foreach (var AutorDto in autores)
         {
+            AutorDto.Nombres = AutorDto.Nombres.ToDisplayName();
+            AutorDto.Apellidos = AutorDto.Apellidos.ToDisplayName();
+
             if (string.IsNullOrEmpty(AutorDto.RouteToken))
             {
                 AutorDto.RouteToken = _routeTokenService.CrearToken(AutorDto.AutorId);
@@ -85,6 +88,8 @@ public class AutorModel : PageModel
         }
 
         ModalActivo = "crear";
+        AutorDto.Nombres = AutorDto.Nombres.ToDisplayName();
+        AutorDto.Apellidos = AutorDto.Apellidos.ToDisplayName();
 
         var result = _autorServicio.Create(AutorDto);
 
@@ -119,6 +124,9 @@ public class AutorModel : PageModel
 
         if (!_routeTokenService.TryObtenerId(token, out var id))
             return NotFound();
+
+        Nombres = Nombres.ToDisplayName();
+        Apellidos = Apellidos.ToDisplayName();
 
         var autorDto = new AutorDto
         {

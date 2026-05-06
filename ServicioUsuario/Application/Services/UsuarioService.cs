@@ -2,6 +2,7 @@ using ServicioUsuario.Application.Dtos;
 using ServicioUsuario.Domain.Entities;
 using ServicioUsuario.Domain.Ports;
 using ServicioUsuario.Infrastructure.Persistence;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -61,9 +62,9 @@ public class UsuarioService : IUsuarioService
         var usuario = new Usuario
         {
             CI = dto.CI,
-            Nombres = dto.Nombres,
-            PrimerApellido = dto.PrimerApellido,
-            SegundoApellido = dto.SegundoApellido,
+            Nombres = NormalizeDisplayName(dto.Nombres),
+            PrimerApellido = NormalizeDisplayName(dto.PrimerApellido),
+            SegundoApellido = NormalizeDisplayName(dto.SegundoApellido),
             Email = dto.Email,
             NombreUsuario = !string.IsNullOrWhiteSpace(dto.NombreUsuario)
                 ? dto.NombreUsuario
@@ -90,9 +91,9 @@ public class UsuarioService : IUsuarioService
             return Task.FromResult<UsuarioDto?>(null);
 
         usuario.CI = dto.CI;
-        usuario.Nombres = dto.Nombres;
-        usuario.PrimerApellido = dto.PrimerApellido;
-        usuario.SegundoApellido = dto.SegundoApellido;
+        usuario.Nombres = NormalizeDisplayName(dto.Nombres);
+        usuario.PrimerApellido = NormalizeDisplayName(dto.PrimerApellido);
+        usuario.SegundoApellido = NormalizeDisplayName(dto.SegundoApellido);
         usuario.Email = dto.Email;
         usuario.NombreUsuario = dto.NombreUsuario;
         usuario.Rol = dto.Rol;
@@ -155,13 +156,28 @@ public class UsuarioService : IUsuarioService
         {
             UsuarioId = usuario.UsuarioId,
             CI = usuario.CI,
-            Nombres = usuario.Nombres,
-            PrimerApellido = usuario.PrimerApellido,
-            SegundoApellido = usuario.SegundoApellido,
+            Nombres = NormalizeDisplayName(usuario.Nombres),
+            PrimerApellido = NormalizeDisplayName(usuario.PrimerApellido),
+            SegundoApellido = NormalizeDisplayName(usuario.SegundoApellido),
             Email = usuario.Email,
             NombreUsuario = usuario.NombreUsuario,
             Rol = usuario.Rol,
             Estado = usuario.Estado
         };
+    }
+
+    private static string NormalizeDisplayName(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var compactado = string.Join(' ', value
+            .Trim()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
+        var textInfo = CultureInfo.GetCultureInfo("es-ES").TextInfo;
+        return textInfo.ToTitleCase(textInfo.ToLower(compactado));
     }
 }
