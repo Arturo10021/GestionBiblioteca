@@ -58,24 +58,29 @@ public class UsuarioService : IUsuarioService
 
     public Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
     {
-        var usuarios = _repositorio.GetAll();
         var usuario = new Usuario
         {
-            UsuarioId = usuarios.Any() ? usuarios.Max(u => u.UsuarioId) + 1 : 1,
             CI = dto.CI,
             Nombres = dto.Nombres,
             PrimerApellido = dto.PrimerApellido,
             SegundoApellido = dto.SegundoApellido,
             Email = dto.Email,
-            NombreUsuario = dto.NombreUsuario,
-            PasswordHash = !string.IsNullOrEmpty(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : null,
+            NombreUsuario = !string.IsNullOrWhiteSpace(dto.NombreUsuario)
+                ? dto.NombreUsuario
+                : (!string.IsNullOrWhiteSpace(dto.CI) ? dto.CI : dto.Email),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? "temporal123"),
             Rol = dto.Rol,
             Estado = true,
             FechaCreacion = DateTime.UtcNow
         };
 
-        // TODO: Implementar inserción en repositorio
-        return Task.FromResult(MapToDto(usuario));
+        _repositorio.Insert(usuario);
+
+        var usuarioPersistido = !string.IsNullOrWhiteSpace(usuario.CI)
+            ? _repositorio.GetByCi(usuario.CI)
+            : _repositorio.GetByNombreUsuario(usuario.NombreUsuario ?? string.Empty);
+
+        return Task.FromResult(MapToDto(usuarioPersistido ?? usuario));
     }
 
     public Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto)

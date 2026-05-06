@@ -8,8 +8,24 @@ namespace Frontend.Adapters;
 
 public class PrestamoFachadaAdapter : IPrestamoFachada
 {
+    private readonly IUsuarioServicio _usuarioServicio;
+
+    public PrestamoFachadaAdapter(IUsuarioServicio usuarioServicio)
+    {
+        _usuarioServicio = usuarioServicio;
+    }
+
     public IEnumerable<KeyValuePair<int, string>> BuscarEjemplaresActivos(string q) => new List<KeyValuePair<int, string>>();
-    public IEnumerable<KeyValuePair<int, string>> BuscarLectoresPorCi(string q) => new List<KeyValuePair<int, string>>();
+    
+    public IEnumerable<KeyValuePair<int, string>> BuscarLectoresPorCi(string q)
+    {
+        var usuarios = _usuarioServicio.Select();
+        return usuarios
+            .Where(u => u.CI != null && u.CI.Contains(q, StringComparison.OrdinalIgnoreCase))
+            .Select(u => new KeyValuePair<int, string>(u.UsuarioId, $"{u.CI} - {u.Nombres} {u.PrimerApellido}"))
+            .ToList();
+    }
+
     public Result<int> CrearPrestamoMultiple(int lectorId, IEnumerable<int> ejIds, DateTime f, int? uid = null, string? obs = null) => Result<int>.Failure(new Error("NotImpl", "Not implemented"));
     public Result<int> CrearPrestamoMultiple(int lectorId, IEnumerable<(int, string?)> d, DateTime f, int? uid = null) => Result<int>.Failure(new Error("NotImpl", "Not implemented"));
     public Result CrearPrestamo(PrestamoDto p) => Result.Failure(new Error("NotImpl", "Not implemented"));
@@ -18,8 +34,18 @@ public class PrestamoFachadaAdapter : IPrestamoFachada
     public PrestamoDto? ObtenerPrestamoPorId(int id) => null;
     public EjemplarDto? ObtenerEjemplarPorId(int id) => null;
     public string? ObtenerLabelEjemplar(int id) => null;
-    public UsuarioDto? ObtenerUsuarioPorCi(string ci) => null;
-    public List<object> ObtenerTodosLosLectores() => new();
+    
+    public UsuarioDto? ObtenerUsuarioPorCi(string ci)
+    {
+        var usuarios = _usuarioServicio.Select();
+        return usuarios.FirstOrDefault(u => u.CI != null && u.CI.Equals(ci, StringComparison.OrdinalIgnoreCase));
+    }
+    
+    public List<object> ObtenerTodosLosLectores()
+    {
+        var usuarios = _usuarioServicio.Select();
+        return usuarios.Cast<object>().ToList();
+    }
 }
 
 public class AnulacionFachadaAdapter : IAnulacionFachada

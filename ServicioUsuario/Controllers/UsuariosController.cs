@@ -59,7 +59,7 @@ public class UsuariosController : ControllerBase
             return BadRequest(ModelState);
 
         var usuario = await _usuarioService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = usuario.UsuarioId }, usuario);
+        return Ok(usuario);
     }
 
     [HttpPut("{id}")]
