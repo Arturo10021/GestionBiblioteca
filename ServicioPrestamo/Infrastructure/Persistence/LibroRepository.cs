@@ -6,7 +6,7 @@ using ServicioPrestamo.Infrastructure.Configuration;
 
 namespace ServicioPrestamo.Infrastructure.Persistence;
 
-public class LibroRepository : ILibroRepositorio, IRepository<Libro, int>
+public class LibroRepository : IRepository<Libro, int>
 {
     public LibroRepository()
     {

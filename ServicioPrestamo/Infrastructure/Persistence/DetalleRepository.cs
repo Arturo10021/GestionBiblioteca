@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 
 namespace ServicioPrestamo.Infrastructure.Persistence;
 
-public class DetalleRepository : IDetalleRepositorio
+public class DetalleRepository : IRepository<Detalle, int>
 {
     public DetalleRepository()
     {

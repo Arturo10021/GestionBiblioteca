@@ -1,17 +1,17 @@
 ﻿using ServicioPrestamo.Application.Interfaces;
 using ServicioPrestamo.Domain.Common;
 using ServicioPrestamo.Domain.Entities;
-using ServicioPrestamo.Domain.Ports;
 using ServicioPrestamo.Domain.Validations;
+using ServicioPrestamo.Infrastructure.Persistence;
 
 namespace ServicioPrestamo.Application.Services;
 
 public class DetalleServicio : IDetalleServicio
 {
-    private readonly IDetalleRepositorio _detalleRepositorio;
-    private readonly IEjemplarRepositorio _ejemplarRepositorio;
+    private readonly DetalleRepository _detalleRepositorio;
+    private readonly EjemplarRepository _ejemplarRepositorio;
 
-    public DetalleServicio(IDetalleRepositorio detalleRepositorio, IEjemplarRepositorio ejemplarRepositorio)
+    public DetalleServicio(DetalleRepository detalleRepositorio, EjemplarRepository ejemplarRepositorio)
     {
         _detalleRepositorio = detalleRepositorio;
         _ejemplarRepositorio = ejemplarRepositorio;

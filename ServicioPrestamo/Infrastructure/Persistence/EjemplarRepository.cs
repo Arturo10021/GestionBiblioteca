@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 
 namespace ServicioPrestamo.Infrastructure.Persistence;
 
-public class EjemplarRepository : IEjemplarRepositorio, IRepository<Ejemplar, int>
+public class EjemplarRepository : IRepository<Ejemplar, int>
 {
     public EjemplarRepository()
     {
@@ -272,4 +272,5 @@ public class EjemplarRepository : IEjemplarRepositorio, IRepository<Ejemplar, in
         return e;
     }
 }
+
 
