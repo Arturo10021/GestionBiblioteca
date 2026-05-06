@@ -19,7 +19,7 @@ public class EjemplarAdapter : IEjemplarServicio
     public Dictionary<int, string> ObtenerTitulosLibros() => CallGet<Dictionary<int, string>>("api/libros/titulos") ?? new();
     public IEnumerable<LibroDto> ObtenerLibrosActivos() => CallGet<List<LibroDto>>("api/libros") ?? new();
     public bool ExisteLibroActivo(int id) => true;
-    public Dictionary<int, string> ObtenerEjemplaresDisponibles() => new();
+    public Dictionary<int, string> ObtenerEjemplaresDisponibles() => CallGet<Dictionary<int, string>>("api/ejemplares/disponibles") ?? new();
     public Result ValidarEjemplar(EjemplarDto e) => Result.Success();
 
     private T? CallGet<T>(string u) where T : class { try { var r = _http.GetAsync(u).Result; r.EnsureSuccessStatusCode(); return r.Content.ReadFromJsonAsync<T>().Result; } catch { return null; } }

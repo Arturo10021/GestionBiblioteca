@@ -335,7 +335,7 @@ public class LibroRepository : ILibroRepositorio, IRepository<Libro, int>
         var result = command.ExecuteScalar();
         return Convert.ToInt32(result) > 0;
     }
-    
+
     public int InsertarAutorYObtenerID(string nombreCompleto, int? usuarioSesionId)
     {
         var partes = nombreCompleto.Trim().Split(' ', 2);
@@ -352,5 +352,25 @@ public class LibroRepository : ILibroRepositorio, IRepository<Libro, int>
         command.Parameters.AddWithValue("@FechaRegistro", DateTime.Now);
 
         return Convert.ToInt32(command.ExecuteScalar());
+    }
+
+    public Dictionary<int, string> ObtenerTitulosLibros()
+    {
+        var titulos = new Dictionary<int, string>();
+
+        using var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection();
+        connection.Open();
+
+        const string query = "SELECT LibroId, Titulo FROM libro";
+
+        using var command = new MySqlCommand(query, connection);
+        using var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            titulos[reader.GetInt32("LibroId")] = reader.GetString("Titulo");
+        }
+
+        return titulos;
     }
 }

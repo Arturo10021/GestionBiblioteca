@@ -161,6 +161,11 @@ public class LibroServicio : ILibroServicio
         return autores.ToDictionary(a => a.AutorId, a => $"{a.Nombres} {(a.Apellidos ?? "")}".Trim());
     }
 
+    public Dictionary<int, string> ObtenerTitulosLibros()
+    {
+        return _libroRepositorio.ObtenerTitulosLibros();
+    }
+
     public IEnumerable<Autor> ObtenerAutoresActivos()
     {
         var autores = _libroRepositorio.ObtenerAutoresActivos();
