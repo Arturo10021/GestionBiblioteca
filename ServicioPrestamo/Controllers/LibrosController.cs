@@ -31,7 +31,7 @@ public class LibrosController : ControllerBase
     [HttpGet("titulos")]
     public ActionResult<Dictionary<int, string>> GetTitulos()
     {
-        return Ok(_libroServicio.ObtenerNombresAutores());
+        return Ok(_libroServicio.ObtenerTitulosLibros());
     }
 
     [HttpPost]

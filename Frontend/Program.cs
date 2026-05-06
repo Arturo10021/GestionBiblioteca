@@ -20,7 +20,7 @@ builder.Services.AddScoped<IEjemplarServicio, EjemplarAdapter>();
 builder.Services.AddScoped<IPrestamoServicio, PrestamoServicioAdapter>();
 builder.Services.AddScoped<IDetalleServicio, DetalleServicioAdapter>();
 builder.Services.AddScoped<IUsuarioServicio, UsuarioAdapter>();
-builder.Services.AddScoped<IPrestamoFachada, PrestamoFachadaAdapter>();
+builder.Services.AddScoped<IPrestamoFachada, PrestamoFachadaHttpAdapter>();
 builder.Services.AddScoped<IAnulacionFachada, AnulacionFachadaAdapter>();
 builder.Services.AddScoped<IEjemplarDisponibilidadFachada, EjemplarDisponibilidadFachadaAdapter>();
 builder.Services.AddScoped<RouteTokenService>();

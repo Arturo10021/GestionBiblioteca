@@ -28,6 +28,12 @@ public class EjemplaresController : ControllerBase
         return ejemplar is null ? NotFound() : Ok(ejemplar);
     }
 
+    [HttpGet("disponibles")]
+    public ActionResult<Dictionary<int, string>> GetDisponibles()
+    {
+        return Ok(_ejemplarServicio.ObtenerEjemplaresDisponibles());
+    }
+
     [HttpPost]
     public ActionResult<Ejemplar> Create(Ejemplar dto)
     {

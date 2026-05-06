@@ -14,6 +14,7 @@ public interface ILibroServicio
     Result Delete(int libroId, int? usuarioSesionId);
 
     Dictionary<int, string> ObtenerNombresAutores();
+    Dictionary<int, string> ObtenerTitulosLibros();
     IEnumerable<Autor> ObtenerAutoresActivos();
     bool ExisteAutorActivo(int autorId);
     int InsertarAutorYObtenerID(string nombreCompleto, int? usuarioSesionId);
