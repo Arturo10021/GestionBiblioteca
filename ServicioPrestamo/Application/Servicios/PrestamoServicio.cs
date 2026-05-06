@@ -5,15 +5,15 @@ using ServicioPrestamo.Application.Interfaces;
 using ServicioPrestamo.Domain.Common;
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Domain.Errors;
-using ServicioPrestamo.Domain.Ports;
+using ServicioPrestamo.Infrastructure.Persistence;
 
 namespace ServicioPrestamo.Application.Services;
 
 public class PrestamoServicio : IPrestamoServicio
 {
-    private readonly IPrestamoRepositorio _prestamoRepositorio;
+    private readonly PrestamoRepository _prestamoRepositorio;
 
-    public PrestamoServicio(IPrestamoRepositorio prestamoRepositorio)
+    public PrestamoServicio(PrestamoRepository prestamoRepositorio)
     {
         _prestamoRepositorio = prestamoRepositorio;
     }

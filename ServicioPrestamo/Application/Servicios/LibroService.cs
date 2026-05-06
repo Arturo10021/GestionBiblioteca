@@ -1,18 +1,17 @@
-﻿using ServicioPrestamo.Domain.Entities;
-using ServicioPrestamo.Application.Interfaces;
+﻿using ServicioPrestamo.Application.Interfaces;
 using ServicioPrestamo.Domain.Common;
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Domain.Errors;
-using ServicioPrestamo.Domain.Ports;
 using ServicioPrestamo.Domain.Validations;
+using ServicioPrestamo.Infrastructure.Persistence;
 
 namespace ServicioPrestamo.Application.Services;
 
 public class LibroServicio : ILibroServicio
 {
-    private readonly ILibroRepositorio _libroRepositorio;
+    private readonly LibroRepository _libroRepositorio;
 
-    public LibroServicio(ILibroRepositorio libroRepositorio)
+    public LibroServicio(LibroRepository libroRepositorio)
     {
         _libroRepositorio = libroRepositorio;
     }

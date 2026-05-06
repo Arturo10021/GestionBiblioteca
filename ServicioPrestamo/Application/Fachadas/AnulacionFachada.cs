@@ -2,7 +2,7 @@
 using ServicioPrestamo.Domain.Common;
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Domain.Errors;
-using ServicioPrestamo.Domain.Ports;
+using ServicioPrestamo.Infrastructure.Persistence;
 using System;
 using System.Linq;
 
@@ -12,11 +12,11 @@ public class AnulacionFachada : IAnulacionFachada
 {
     private readonly IPrestamoServicio _prestamoServicio;
     private readonly IEjemplarServicio _ejemplarServicio;
-    private readonly IDetalleRepositorio _detalleRepositorio;
+    private readonly DetalleRepository _detalleRepositorio;
     private readonly IEjemplarDisponibilidadFachada _disponibilidadFachada;
     public AnulacionFachada(
         IPrestamoServicio prestamoServicio,
-        IDetalleRepositorio detalleRepositorio,
+        DetalleRepository detalleRepositorio,
         IEjemplarServicio ejemplarServicio,
         IEjemplarDisponibilidadFachada disponibilidadFachada)
     {

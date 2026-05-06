@@ -2,18 +2,17 @@
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Application.Interfaces;
 using ServicioPrestamo.Domain.Common;
-using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Domain.Errors;
-using ServicioPrestamo.Domain.Ports;
 using ServicioPrestamo.Domain.Validations;
+using ServicioPrestamo.Infrastructure.Persistence;
 
 namespace ServicioPrestamo.Application.Services;
 
 public class EjemplarServicio : IEjemplarServicio
 {
-    private readonly IEjemplarRepositorio _ejemplarRepositorio;
+    private readonly EjemplarRepository _ejemplarRepositorio;
 
-    public EjemplarServicio(IEjemplarRepositorio ejemplarRepositorio)
+    public EjemplarServicio(EjemplarRepository ejemplarRepositorio)
     {
         _ejemplarRepositorio = ejemplarRepositorio;
     }

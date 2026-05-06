@@ -2,7 +2,7 @@ using ServicioPrestamo.Domain.Ports;
 
 namespace ServicioPrestamo.Infrastructure.Creators;
 
-public abstract class RepositoryFactory<T,TId>
+public abstract class RepositoryFactory<T, TId>
 {
     protected readonly string ConnectionString;
 
@@ -10,5 +10,6 @@ public abstract class RepositoryFactory<T,TId>
     {
         ConnectionString = connectionString;
     }
-    public abstract IRepository<T,TId> CreateRepository();
+
+    public abstract IRepository<T, TId> CreateRepository();
 }
