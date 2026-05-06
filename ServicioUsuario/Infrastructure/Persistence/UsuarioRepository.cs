@@ -50,6 +50,34 @@ public class UsuarioRepository : IUsuarioRepositorio
         return usuario;
     }
 
+    public List<Usuario> GetAll()
+    {
+        var usuarios = new List<Usuario>();
+        try
+        {
+            using (var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection())
+            {
+                connection.Open();
+                string query = "SELECT * FROM usuario;";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            usuarios.Add(MapReaderToUsuario(reader));
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al obtener todos los usuarios: {ex.Message}");
+        }
+        return usuarios;
+    }
+
     public Usuario? GetById(int id)
     {
         Usuario? usuario = null;

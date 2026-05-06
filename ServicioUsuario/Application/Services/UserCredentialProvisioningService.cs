@@ -38,7 +38,7 @@ public class UserCredentialProvisioningService : IUserCredentialProvisioningServ
 
         var nombreUsuario = GenerarNombreUsuarioUnico(usuario.Nombres, usuario.PrimerApellido, usuario.SegundoApellido);
         var passwordTemporal = GenerarPasswordTemporalSegura();
-        var hashPassword = ComputeSha256(passwordTemporal);
+        var hashPassword = BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
 
         usuario.NombreUsuario = nombreUsuario;
         usuario.PasswordHash = hashPassword;
@@ -74,7 +74,7 @@ public class UserCredentialProvisioningService : IUserCredentialProvisioningServ
         {
             GeneratedUserName = nombreUsuario,
             PasswordHash = hashPassword,
-            PasswordAlgorithm = Sha2Algorithm,
+            PasswordAlgorithm = "BCrypt",
             EmailSent = emailSent,
             EmailError = emailError
         };
@@ -181,10 +181,4 @@ public class UserCredentialProvisioningService : IUserCredentialProvisioningServ
         return new string(passwordChars);
     }
 
-    private static string ComputeSha256(string password)
-    {
-        var bytes = Encoding.UTF8.GetBytes(password);
-        var hash = SHA256.HashData(bytes);
-        return Convert.ToBase64String(hash);
-    }
 }
