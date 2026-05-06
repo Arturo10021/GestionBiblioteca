@@ -3,18 +3,17 @@ using System.Linq;
 using ServicioPrestamo.Domain.Common;
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Domain.Errors;
-using ServicioPrestamo.Domain.Ports;
 using ServicioPrestamo.Application.Interfaces;
-using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Infrastructure.Formatting;
+using ServicioPrestamo.Infrastructure.Persistence;
 
 namespace ServicioPrestamo.Application.Services;
 
 public class AutorServicio : IAutorServicio
 {
-    private readonly IAutorRepositorio _autorRepositorio;
+    private readonly AutorRepository _autorRepositorio;
 
-    public AutorServicio(IAutorRepositorio autorRepositorio)
+    public AutorServicio(AutorRepository autorRepositorio)
     {
         _autorRepositorio = autorRepositorio;
     }

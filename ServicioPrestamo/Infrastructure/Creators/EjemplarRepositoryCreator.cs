@@ -1,10 +1,11 @@
+using Microsoft.Extensions.Configuration;
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Domain.Ports;
 using ServicioPrestamo.Infrastructure.Persistence;
 
 namespace ServicioPrestamo.Infrastructure.Creators;
 
-public class EjemplarRepositoryCreator : RepositoryFactory<Ejemplar,int>
+public class EjemplarRepositoryCreator : RepositoryFactory<Ejemplar, int>
 {
     private readonly IConfiguration _configuration;
 
@@ -14,7 +15,7 @@ public class EjemplarRepositoryCreator : RepositoryFactory<Ejemplar,int>
         _configuration = configuration;
     }
 
-    public override IRepository<Ejemplar,int> CreateRepository()
+    public override IRepository<Ejemplar, int> CreateRepository()
     {
         return new EjemplarRepository();
     }

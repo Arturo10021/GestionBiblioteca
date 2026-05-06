@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 
 namespace ServicioPrestamo.Infrastructure.Persistence;
 
-public class AutorRepository : IAutorRepositorio, IRepository<Autor, int>
+public class AutorRepository : IRepository<Autor, int>
 {
     public AutorRepository()
     {
