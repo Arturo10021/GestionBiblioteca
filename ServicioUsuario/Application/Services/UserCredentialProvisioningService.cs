@@ -2,9 +2,9 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using ServicioUsuario.Application.Interfaces;
-using ServicioUsuario.Domain.Common;
 using ServicioUsuario.Domain.Entities;
 using ServicioUsuario.Domain.Ports;
+using ServicioUsuario.Infrastructure.Persistence;
 
 namespace ServicioUsuario.Application.Services;
 
@@ -15,10 +15,10 @@ public class UserCredentialProvisioningService : IUserCredentialProvisioningServ
     private const string Sha2Algorithm = "SHA-256";
     private const string PasswordCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*_-";
 
-    private readonly IUsuarioRepositorio _usuarioRepositorio;
+    private readonly UsuarioRepository _usuarioRepositorio;
     private readonly IEmailSender _emailSender;
 
-    public UserCredentialProvisioningService(IUsuarioRepositorio usuarioRepositorio, IEmailSender emailSender)
+    public UserCredentialProvisioningService(UsuarioRepository usuarioRepositorio, IEmailSender emailSender)
     {
         _usuarioRepositorio = usuarioRepositorio;
         _emailSender = emailSender;

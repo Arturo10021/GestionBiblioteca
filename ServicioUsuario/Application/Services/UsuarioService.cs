@@ -1,6 +1,7 @@
 using ServicioUsuario.Application.Dtos;
 using ServicioUsuario.Domain.Entities;
 using ServicioUsuario.Domain.Ports;
+using ServicioUsuario.Infrastructure.Persistence;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -20,9 +21,9 @@ public interface IUsuarioService
 
 public class UsuarioService : IUsuarioService
 {
-    private readonly IUsuarioRepositorio _repositorio;
+    private readonly UsuarioRepository _repositorio;
 
-    public UsuarioService(IUsuarioRepositorio repositorio)
+    public UsuarioService(UsuarioRepository repositorio)
     {
         _repositorio = repositorio;
     }
