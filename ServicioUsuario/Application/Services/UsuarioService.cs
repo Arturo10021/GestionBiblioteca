@@ -1,5 +1,8 @@
 using ServicioUsuario.Application.Dtos;
 using ServicioUsuario.Domain.Entities;
+using ServicioUsuario.Domain.Ports;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ServicioUsuario.Application.Services;
 
@@ -17,42 +20,16 @@ public interface IUsuarioService
 
 public class UsuarioService : IUsuarioService
 {
-    private static List<Usuario> _usuarios = new();
+    private readonly IUsuarioRepositorio _repositorio;
 
-    public UsuarioService()
+    public UsuarioService(IUsuarioRepositorio repositorio)
     {
-        _usuarios = new List<Usuario>
-        {
-            new Usuario
-            {
-                UsuarioId = 1,
-                CI = "12345678",
-                Nombres = "Admin",
-                PrimerApellido = "Sistema",
-                Email = "admin@biblioteca.com",
-                NombreUsuario = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
-                Rol = "Admin",
-                Estado = true
-            },
-            new Usuario
-            {
-                UsuarioId = 2,
-                CI = "87654321",
-                Nombres = "Biblio",
-                PrimerApellido = "Biblioteca",
-                Email = "biblio@biblioteca.com",
-                NombreUsuario = "biblio",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("biblio"),
-                Rol = "Bibliotecario",
-                Estado = true
-            }
-        };
+        _repositorio = repositorio;
     }
 
     public Task<List<UsuarioDto>> GetAllAsync()
     {
-        var usuarios = _usuarios
+        var usuarios = _repositorio.GetAll()
             .Where(u => u.Estado)
             .Select(MapToDto)
             .ToList();
@@ -61,27 +38,29 @@ public class UsuarioService : IUsuarioService
 
     public Task<UsuarioDto?> GetByIdAsync(int id)
     {
-        var usuario = _usuarios.FirstOrDefault(u => u.UsuarioId == id);
+        var usuario = _repositorio.GetById(id);
         return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
     }
 
     public Task<UsuarioDto?> GetByEmailAsync(string email)
     {
-        var usuario = _usuarios.FirstOrDefault(u => u.Email == email);
+        var usuarios = _repositorio.GetAll();
+        var usuario = usuarios.FirstOrDefault(u => u.Email == email);
         return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
     }
 
     public Task<UsuarioDto?> GetByCIAsync(string ci)
     {
-        var usuario = _usuarios.FirstOrDefault(u => u.CI == ci);
+        var usuario = _repositorio.GetByCi(ci);
         return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
     }
 
     public Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
     {
+        var usuarios = _repositorio.GetAll();
         var usuario = new Usuario
         {
-            UsuarioId = _usuarios.Any() ? _usuarios.Max(u => u.UsuarioId) + 1 : 1,
+            UsuarioId = usuarios.Any() ? usuarios.Max(u => u.UsuarioId) + 1 : 1,
             CI = dto.CI,
             Nombres = dto.Nombres,
             PrimerApellido = dto.PrimerApellido,
@@ -94,13 +73,13 @@ public class UsuarioService : IUsuarioService
             FechaCreacion = DateTime.UtcNow
         };
 
-        _usuarios.Add(usuario);
+        // TODO: Implementar inserción en repositorio
         return Task.FromResult(MapToDto(usuario));
     }
 
     public Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto)
     {
-        var usuario = _usuarios.FirstOrDefault(u => u.UsuarioId == id);
+        var usuario = _repositorio.GetById(id);
         if (usuario == null)
             return Task.FromResult<UsuarioDto?>(null);
 
@@ -114,28 +93,54 @@ public class UsuarioService : IUsuarioService
         usuario.Estado = dto.Estado;
         usuario.FechaActualizacion = DateTime.UtcNow;
 
+        // TODO: Implementar actualización en repositorio
         return Task.FromResult<UsuarioDto?>(MapToDto(usuario));
     }
 
     public Task<bool> DeleteAsync(int id)
     {
-        var usuario = _usuarios.FirstOrDefault(u => u.UsuarioId == id);
+        var usuario = _repositorio.GetById(id);
         if (usuario == null)
             return Task.FromResult(false);
 
         usuario.Estado = false;
+        // TODO: Implementar eliminación lógica en repositorio
         return Task.FromResult(true);
     }
 
     public Task<UsuarioDto?> LoginAsync(string nombreUsuario, string password)
     {
-        var usuario = _usuarios.FirstOrDefault(u =>
-            u.NombreUsuario == nombreUsuario &&
-            u.Estado &&
-            u.PasswordHash != null &&
-            BCrypt.Net.BCrypt.Verify(password, u.PasswordHash));
+        var usuario = _repositorio.GetByNombreUsuario(nombreUsuario);
 
-        return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
+        if (usuario == null || !usuario.Estado || usuario.PasswordHash == null)
+            return Task.FromResult<UsuarioDto?>(null);
+
+        if (!VerifyPassword(password, usuario.PasswordHash))
+            return Task.FromResult<UsuarioDto?>(null);
+
+        return Task.FromResult<UsuarioDto?>(MapToDto(usuario));
+    }
+
+    private static bool VerifyPassword(string password, string storedHash)
+    {
+        try
+        {
+            if (BCrypt.Net.BCrypt.Verify(password, storedHash))
+                return true;
+        }
+        catch
+        {
+            // Hash legado o formato no compatible con BCrypt.
+        }
+
+        return string.Equals(ComputeSha256(password), storedHash, StringComparison.Ordinal);
+    }
+
+    private static string ComputeSha256(string password)
+    {
+        var bytes = Encoding.UTF8.GetBytes(password);
+        var hash = SHA256.HashData(bytes);
+        return Convert.ToBase64String(hash);
     }
 
     private UsuarioDto MapToDto(Usuario usuario)

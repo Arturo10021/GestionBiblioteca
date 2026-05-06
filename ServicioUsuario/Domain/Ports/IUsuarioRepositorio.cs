@@ -4,6 +4,7 @@ namespace ServicioUsuario.Domain.Ports;
 
 public interface IUsuarioRepositorio
 {
+    List<Usuario> GetAll();
     Usuario? GetByNombreUsuario(string nombreUsuario);
     bool ExisteNombreUsuario(string nombreUsuario);
     bool ExisteEmail(string email);
