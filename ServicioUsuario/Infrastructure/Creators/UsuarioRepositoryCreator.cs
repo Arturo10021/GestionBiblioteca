@@ -14,7 +14,7 @@ public class UsuarioRepositoryCreator
         _configuration = configuration;
     }
 
-    public IUsuarioRepositorio CreateRepository()
+    public UsuarioRepository CreateRepository()
     {
         return new UsuarioRepository(_configuration);
     }

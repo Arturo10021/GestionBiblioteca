@@ -40,6 +40,9 @@ public class UsuarioAdapter : IUsuarioServicio
     {
         try
         {
+            d.Nombres = d.Nombres.ToDisplayName();
+            d.PrimerApellido = d.PrimerApellido.ToDisplayName();
+            d.SegundoApellido = d.SegundoApellido.ToDisplayName();
             var response = _http.PostAsJsonAsync("api/usuarios", d).Result;
             if (!response.IsSuccessStatusCode)
                 return Result<UsuarioDto>.Failure(new Error("Create", "Error al crear usuario"));
@@ -57,21 +60,35 @@ public class UsuarioAdapter : IUsuarioServicio
     {
         try
         {
-            var usuarioDto = new UsuarioDto
+            var ciCompleto = JoinCiComp(d.CI ?? string.Empty, d.Complemento ?? string.Empty);
+            var createUsuarioDto = new UsuarioDto
             {
-                NombreUsuario = d.Nombres,
-                Nombres = d.Nombres,
-                PrimerApellido = d.PrimerApellido,
+                NombreUsuario = !string.IsNullOrWhiteSpace(ciCompleto)
+                    ? ciCompleto
+                    : d.Nombres,
+                Nombres = d.Nombres.ToDisplayName(),
+                PrimerApellido = d.PrimerApellido.ToDisplayName(),
+                SegundoApellido = d.SegundoApellido.ToDisplayName(),
                 Email = d.Email,
+                CI = ciCompleto,
                 Rol = "Lector",
                 Estado = true
             };
 
-            var response = _http.PostAsJsonAsync("api/usuarios", usuarioDto).Result;
-            return response.IsSuccessStatusCode ? Result.Success() : Result.Failure(new Error("Create", "Error al crear lector"));
+            var response = _http.PostAsJsonAsync("api/usuarios", createUsuarioDto).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = response.Content.ReadAsStringAsync().Result;
+                System.Diagnostics.Debug.WriteLine($"Error CrearLector: {response.StatusCode} - {errorContent}");
+                return Result.Failure(new Error("Create", $"Error al crear lector: {errorContent}"));
+            }
+            
+            System.Diagnostics.Debug.WriteLine("Lector creado exitosamente");
+            return Result.Success();
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Exception CrearLector: {ex.Message}");
             return Result.Failure(new Error("Create", ex.Message));
         }
     }

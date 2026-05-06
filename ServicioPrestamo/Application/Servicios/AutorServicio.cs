@@ -6,6 +6,7 @@ using ServicioPrestamo.Domain.Errors;
 using ServicioPrestamo.Domain.Ports;
 using ServicioPrestamo.Application.Interfaces;
 using ServicioPrestamo.Domain.Entities;
+using ServicioPrestamo.Infrastructure.Formatting;
 
 namespace ServicioPrestamo.Application.Services;
 
@@ -24,8 +25,8 @@ public class AutorServicio : IAutorServicio
         return autores.Select(a => new Autor
         {
             AutorId = a.AutorId,
-            Nombres = a.Nombres,
-            Apellidos = a.Apellidos,
+            Nombres = a.Nombres.ToDisplayName(),
+            Apellidos = a.Apellidos.ToDisplayName(),
             Nacionalidad = a.Nacionalidad,
             FechaNacimiento = a.FechaNacimiento,
             Estado = a.Estado,
@@ -42,8 +43,8 @@ public class AutorServicio : IAutorServicio
 
         var autor = new Autor
         {
-            Nombres = Autor.Nombres,
-            Apellidos = Autor.Apellidos,
+            Nombres = Autor.Nombres.ToDisplayName(),
+            Apellidos = Autor.Apellidos.ToDisplayName(),
             Nacionalidad = Autor.Nacionalidad,
             FechaNacimiento = Autor.FechaNacimiento,
             Estado = Autor.Estado,
@@ -54,6 +55,8 @@ public class AutorServicio : IAutorServicio
         _autorRepositorio.Insert(autor);
         
         Autor.AutorId = autor.AutorId;
+        Autor.Nombres = autor.Nombres;
+        Autor.Apellidos = autor.Apellidos;
         return Result<Autor>.Success(Autor);
     }
 
@@ -70,14 +73,16 @@ public class AutorServicio : IAutorServicio
             return Result<Autor>.Failure(AutorErrors.NombresObligatorios);
         }
 
-        autorExistente.Nombres = Autor.Nombres;
-        autorExistente.Apellidos = Autor.Apellidos;
+        autorExistente.Nombres = Autor.Nombres.ToDisplayName();
+        autorExistente.Apellidos = Autor.Apellidos.ToDisplayName();
         autorExistente.Nacionalidad = Autor.Nacionalidad;
         autorExistente.FechaNacimiento = Autor.FechaNacimiento;
         autorExistente.Estado = Autor.Estado;
         autorExistente.UltimaActualizacion = DateTime.UtcNow;
 
         _autorRepositorio.Update(autorExistente);
+        Autor.Nombres = autorExistente.Nombres;
+        Autor.Apellidos = autorExistente.Apellidos;
         return Result<Autor>.Success(Autor);
     }
 
@@ -99,8 +104,8 @@ public class AutorServicio : IAutorServicio
         return new Autor
         {
             AutorId = a.AutorId,
-            Nombres = a.Nombres,
-            Apellidos = a.Apellidos,
+            Nombres = a.Nombres.ToDisplayName(),
+            Apellidos = a.Apellidos.ToDisplayName(),
             Nacionalidad = a.Nacionalidad,
             FechaNacimiento = a.FechaNacimiento,
             Estado = a.Estado,
@@ -114,7 +119,7 @@ public class AutorServicio : IAutorServicio
         var autores = _autorRepositorio.ObtenerAutoresActivos();
         foreach(var a in autores)
         {
-            dict[a.AutorId] = a.Nombres;
+            dict[a.AutorId] = a.Nombres.ToDisplayName();
         }
         return dict;
     }

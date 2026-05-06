@@ -1,6 +1,8 @@
 using ServicioUsuario.Application.Dtos;
 using ServicioUsuario.Domain.Entities;
 using ServicioUsuario.Domain.Ports;
+using ServicioUsuario.Infrastructure.Persistence;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -20,9 +22,9 @@ public interface IUsuarioService
 
 public class UsuarioService : IUsuarioService
 {
-    private readonly IUsuarioRepositorio _repositorio;
+    private readonly UsuarioRepository _repositorio;
 
-    public UsuarioService(IUsuarioRepositorio repositorio)
+    public UsuarioService(UsuarioRepository repositorio)
     {
         _repositorio = repositorio;
     }
@@ -57,24 +59,29 @@ public class UsuarioService : IUsuarioService
 
     public Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
     {
-        var usuarios = _repositorio.GetAll();
         var usuario = new Usuario
         {
-            UsuarioId = usuarios.Any() ? usuarios.Max(u => u.UsuarioId) + 1 : 1,
             CI = dto.CI,
-            Nombres = dto.Nombres,
-            PrimerApellido = dto.PrimerApellido,
-            SegundoApellido = dto.SegundoApellido,
+            Nombres = NormalizeDisplayName(dto.Nombres),
+            PrimerApellido = NormalizeDisplayName(dto.PrimerApellido),
+            SegundoApellido = NormalizeDisplayName(dto.SegundoApellido),
             Email = dto.Email,
-            NombreUsuario = dto.NombreUsuario,
-            PasswordHash = !string.IsNullOrEmpty(dto.Password) ? BCrypt.Net.BCrypt.HashPassword(dto.Password) : null,
+            NombreUsuario = !string.IsNullOrWhiteSpace(dto.NombreUsuario)
+                ? dto.NombreUsuario
+                : (!string.IsNullOrWhiteSpace(dto.CI) ? dto.CI : dto.Email),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? "temporal123"),
             Rol = dto.Rol,
             Estado = true,
             FechaCreacion = DateTime.UtcNow
         };
 
-        // TODO: Implementar inserción en repositorio
-        return Task.FromResult(MapToDto(usuario));
+        _repositorio.Insert(usuario);
+
+        var usuarioPersistido = !string.IsNullOrWhiteSpace(usuario.CI)
+            ? _repositorio.GetByCi(usuario.CI)
+            : _repositorio.GetByNombreUsuario(usuario.NombreUsuario ?? string.Empty);
+
+        return Task.FromResult(MapToDto(usuarioPersistido ?? usuario));
     }
 
     public Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto)
@@ -84,9 +91,9 @@ public class UsuarioService : IUsuarioService
             return Task.FromResult<UsuarioDto?>(null);
 
         usuario.CI = dto.CI;
-        usuario.Nombres = dto.Nombres;
-        usuario.PrimerApellido = dto.PrimerApellido;
-        usuario.SegundoApellido = dto.SegundoApellido;
+        usuario.Nombres = NormalizeDisplayName(dto.Nombres);
+        usuario.PrimerApellido = NormalizeDisplayName(dto.PrimerApellido);
+        usuario.SegundoApellido = NormalizeDisplayName(dto.SegundoApellido);
         usuario.Email = dto.Email;
         usuario.NombreUsuario = dto.NombreUsuario;
         usuario.Rol = dto.Rol;
@@ -149,13 +156,28 @@ public class UsuarioService : IUsuarioService
         {
             UsuarioId = usuario.UsuarioId,
             CI = usuario.CI,
-            Nombres = usuario.Nombres,
-            PrimerApellido = usuario.PrimerApellido,
-            SegundoApellido = usuario.SegundoApellido,
+            Nombres = NormalizeDisplayName(usuario.Nombres),
+            PrimerApellido = NormalizeDisplayName(usuario.PrimerApellido),
+            SegundoApellido = NormalizeDisplayName(usuario.SegundoApellido),
             Email = usuario.Email,
             NombreUsuario = usuario.NombreUsuario,
             Rol = usuario.Rol,
             Estado = usuario.Estado
         };
+    }
+
+    private static string NormalizeDisplayName(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var compactado = string.Join(' ', value
+            .Trim()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
+        var textInfo = CultureInfo.GetCultureInfo("es-ES").TextInfo;
+        return textInfo.ToTitleCase(textInfo.ToLower(compactado));
     }
 }

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace ServicioUsuario.Infrastructure.Persistence;
 
-public class UsuarioRepository : IUsuarioRepositorio
+public class UsuarioRepository : IRepository<Usuario, int>
 {
     private readonly IConfiguration? _configuration;
 
@@ -50,7 +50,7 @@ public class UsuarioRepository : IUsuarioRepositorio
         return usuario;
     }
 
-    public List<Usuario> GetAll()
+    public IEnumerable<Usuario> GetAll()
     {
         var usuarios = new List<Usuario>();
         try
@@ -207,6 +207,95 @@ public class UsuarioRepository : IUsuarioRepositorio
         if (string.IsNullOrWhiteSpace(complemento))
             return ci;
         return $"{ci}-{complemento}";
+    }
+
+    public void Insert(Usuario entity)
+    {
+        try
+        {
+            using (var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection())
+            {
+                connection.Open();
+                string query = @"INSERT INTO usuario (Nombres, PrimerApellido, SegundoApellido, Email, NombreUsuario, PasswordHash, Rol, Estado, CI) 
+                                VALUES (@Nombres, @PrimerApellido, @SegundoApellido, @Email, @NombreUsuario, @PasswordHash, @Rol, @Estado, @CI);";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Nombres", entity.Nombres);
+                    command.Parameters.AddWithValue("@PrimerApellido", entity.PrimerApellido);
+                    command.Parameters.AddWithValue("@SegundoApellido", entity.SegundoApellido ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Email", entity.Email);
+                    command.Parameters.AddWithValue("@NombreUsuario", entity.NombreUsuario ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@PasswordHash", entity.PasswordHash ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Rol", entity.Rol);
+                    command.Parameters.AddWithValue("@Estado", entity.Estado);
+                    command.Parameters.AddWithValue("@CI", entity.CI ?? (object)DBNull.Value);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al insertar usuario: {ex.Message}");
+        }
+    }
+
+    public void Update(Usuario entity)
+    {
+        try
+        {
+            using (var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection())
+            {
+                connection.Open();
+                string query = @"UPDATE usuario SET Nombres = @Nombres, PrimerApellido = @PrimerApellido, SegundoApellido = @SegundoApellido, 
+                                Email = @Email, NombreUsuario = @NombreUsuario, PasswordHash = @PasswordHash, Rol = @Rol, Estado = @Estado, CI = @CI 
+                                WHERE UsuarioId = @UsuarioId;";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@UsuarioId", entity.UsuarioId);
+                    command.Parameters.AddWithValue("@Nombres", entity.Nombres);
+                    command.Parameters.AddWithValue("@PrimerApellido", entity.PrimerApellido);
+                    command.Parameters.AddWithValue("@SegundoApellido", entity.SegundoApellido ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Email", entity.Email);
+                    command.Parameters.AddWithValue("@NombreUsuario", entity.NombreUsuario ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@PasswordHash", entity.PasswordHash ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Rol", entity.Rol);
+                    command.Parameters.AddWithValue("@Estado", entity.Estado);
+                    command.Parameters.AddWithValue("@CI", entity.CI ?? (object)DBNull.Value);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar usuario: {ex.Message}");
+        }
+    }
+
+    public void Delete(Usuario entity)
+    {
+        try
+        {
+            using (var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection())
+            {
+                connection.Open();
+                string query = "DELETE FROM usuario WHERE UsuarioId = @UsuarioId;";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@UsuarioId", entity.UsuarioId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al eliminar usuario: {ex.Message}");
+        }
+    }
+
+    public void SaveChanges()
+    {
+        // En MySQL con MySqlCommand, los cambios se aplican automáticamente con ExecuteNonQuery()
+        // Este método es un placeholder para mantener compatibilidad con la interfaz IRepository
     }
 
     private Usuario MapReaderToUsuario(MySqlDataReader reader)

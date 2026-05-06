@@ -65,6 +65,9 @@ public class IndexModel : PageModel
         }
 
         NuevoUsuario.Rol = RolNuevoUsuario;
+        NuevoUsuario.Nombres = NuevoUsuario.Nombres.ToDisplayName();
+        NuevoUsuario.PrimerApellido = NuevoUsuario.PrimerApellido.ToDisplayName();
+        NuevoUsuario.SegundoApellido = NuevoUsuario.SegundoApellido.ToDisplayName();
 
         // unir CI y complemento si viene
         if (!string.IsNullOrWhiteSpace(Complemento))
@@ -153,9 +156,9 @@ public class IndexModel : PageModel
             {
                 UsuarioId = u.UsuarioId,
                 UsuarioIdToken = _routeTokenService.CrearToken(u.UsuarioId),
-                Nombres = u.Nombres ?? string.Empty,
-                PrimerApellido = u.PrimerApellido ?? string.Empty,
-                SegundoApellido = u.SegundoApellido ?? string.Empty,
+                Nombres = (u.Nombres ?? string.Empty).ToDisplayName(),
+                PrimerApellido = (u.PrimerApellido ?? string.Empty).ToDisplayName(),
+                SegundoApellido = (u.SegundoApellido ?? string.Empty).ToDisplayName(),
                 Email = u.Email ?? string.Empty,
                 NombreUsuario = u.NombreUsuario ?? string.Empty,
                 Rol = u.Rol ?? string.Empty,

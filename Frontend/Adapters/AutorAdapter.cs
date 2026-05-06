@@ -32,6 +32,8 @@ public class AutorAdapter : IAutorServicio
     {
         try
         {
+            dto.Nombres = dto.Nombres.ToDisplayName();
+            dto.Apellidos = dto.Apellidos.ToDisplayName();
             var response = _http.PostAsJsonAsync("api/autores", dto).Result;
             if (!response.IsSuccessStatusCode)
                 return Result<AutorDto>.Failure(new Error("Create", "Error al crear AutorDto"));
@@ -48,6 +50,8 @@ public class AutorAdapter : IAutorServicio
     {
         try
         {
+            dto.Nombres = dto.Nombres.ToDisplayName();
+            dto.Apellidos = dto.Apellidos.ToDisplayName();
             var response = _http.PutAsJsonAsync($"api/autores/{dto.AutorId}", dto).Result;
             return response.IsSuccessStatusCode
                 ? Result<AutorDto>.Success(dto)
