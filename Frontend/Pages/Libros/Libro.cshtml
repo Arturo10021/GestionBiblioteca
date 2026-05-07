@@ -707,6 +707,86 @@ function decodificarHtml(texto) {
     return txt.value;
 }
 
+function permitirSoloIsbn(id) {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9\-X]/gi, '').toUpperCase();
+    });
+
+    input.addEventListener('keypress', function(e) {
+        const char = String.fromCharCode(e.which);
+        if (!/[0-9\-X]/.test(char)) {
+            e.preventDefault();
+        }
+    });
+}
+
+function sincronizarCamposCrear() {
+    const autorSelect = document.getElementById('custom-select-autor-create');
+    const autorSearchInput = document.getElementById('autor-search-create');
+    const tituloSelect = document.getElementById('custom-select-titulo-create');
+    const tituloSearchInput = document.getElementById('titulo-search-create');
+    const generoSelect = document.getElementById('custom-select-genero-create');
+    const generoSearchInput = document.getElementById('genero-search-create');
+    const idiomaSelect = document.getElementById('custom-select-idioma-create');
+    const idiomaSearchInput = document.getElementById('idioma-search-create');
+
+    const createAutorId = document.getElementById('createAutorId');
+    const createTituloHidden = document.getElementById('createTituloHidden');
+    const createGeneroHidden = document.getElementById('createGeneroHidden');
+    const createIdiomaHidden = document.getElementById('createIdiomaHidden');
+
+    if (autorSearchInput && autorSearchInput.value.trim() && !createAutorId.value) {
+        createAutorId.value = autorSearchInput.value.trim();
+    }
+
+    if (tituloSearchInput && tituloSearchInput.value.trim()) {
+        createTituloHidden.value = tituloSearchInput.value.trim();
+    }
+
+    if (generoSearchInput && generoSearchInput.value.trim()) {
+        createGeneroHidden.value = generoSearchInput.value.trim();
+    }
+
+    if (idiomaSearchInput && idiomaSearchInput.value.trim()) {
+        createIdiomaHidden.value = idiomaSearchInput.value.trim();
+    }
+}
+
+function sincronizarCamposEditar() {
+    const autorSelect = document.getElementById('custom-select-autor-edit');
+    const autorSearchInput = document.getElementById('autor-search-edit');
+    const tituloSelect = document.getElementById('custom-select-titulo-edit');
+    const tituloSearchInput = document.getElementById('titulo-search-edit');
+    const generoSelect = document.getElementById('custom-select-genero-edit');
+    const generoSearchInput = document.getElementById('genero-search-edit');
+    const idiomaSelect = document.getElementById('custom-select-idioma-edit');
+    const idiomaSearchInput = document.getElementById('idioma-search-edit');
+
+    const editAutorId = document.getElementById('editAutorId');
+    const editTituloHidden = document.getElementById('editTituloHidden');
+    const editGeneroHidden = document.getElementById('editGeneroHidden');
+    const editIdiomaHidden = document.getElementById('editIdiomaHidden');
+
+    if (autorSearchInput && autorSearchInput.value.trim() && !editAutorId.value) {
+        editAutorId.value = autorSearchInput.value.trim();
+    }
+
+    if (tituloSearchInput && tituloSearchInput.value.trim()) {
+        editTituloHidden.value = tituloSearchInput.value.trim();
+    }
+
+    if (generoSearchInput && generoSearchInput.value.trim()) {
+        editGeneroHidden.value = generoSearchInput.value.trim();
+    }
+
+    if (idiomaSearchInput && idiomaSearchInput.value.trim()) {
+        editIdiomaHidden.value = idiomaSearchInput.value.trim();
+    }
+}
+
 function abrirModalEliminar(token) {
     document.getElementById("libroTokenInput").value = token;
     document.getElementById("modalEliminar").style.display = "flex";
@@ -716,124 +796,74 @@ function cerrarModalEliminar() {
     document.getElementById("modalEliminar").style.display = "none";
 }
 
-function mostrarModalCrear() {
-    document.getElementById("modalCrear").style.display = "flex";
-}
-
-function mostrarModalEditar() {
-    document.getElementById("modalEditar").style.display = "flex";
-}
-
-function sincronizarCamposCrear() {
-    const tituloInput = document.getElementById("titulo-search-create");
-    const tituloHidden = document.getElementById("createTituloHidden");
-    const tituloText = document.getElementById("createTituloText");
-    const generoInput = document.getElementById("genero-search-create");
-    const generoHidden = document.getElementById("createGeneroHidden");
-    const generoText = document.getElementById("createGeneroText");
-
-    if (tituloInput && tituloHidden) {
-        const valorTitulo = (tituloInput.value || tituloHidden.value || "").trim();
-        tituloHidden.value = valorTitulo;
-        tituloText.textContent = valorTitulo || "Título del libro";
-    }
-
-    if (generoInput && generoHidden) {
-        const valorGenero = (generoInput.value || generoHidden.value || "").trim();
-        generoHidden.value = valorGenero;
-        generoText.textContent = valorGenero || "Género";
-    }
-
-    const autorIdInput = document.getElementById("createAutorId");
-    const autorNuevo = document.getElementById("createAutorNuevo");
-    const autorSearch = document.getElementById("autor-search-create");
-
-    if (autorIdInput && autorNuevo && autorSearch) {
-        const valorActual = autorIdInput.value.trim();
-        if (valorActual && isNaN(Number(valorActual))) {
-            autorNuevo.value = valorActual;
-            autorIdInput.value = "";
-        } else if (!valorActual) {
-            autorNuevo.value = autorSearch.value.trim();
-        } else {
-            autorNuevo.value = "";
-        }
-    }
-}
-
-function sincronizarCamposEditar() {
-    const tituloInput = document.getElementById("titulo-search-edit");
-    const tituloHidden = document.getElementById("editTituloHidden");
-    const tituloText = document.getElementById("editTituloText");
-    const generoInput = document.getElementById("genero-search-edit");
-    const generoHidden = document.getElementById("editGeneroHidden");
-    const generoText = document.getElementById("editGeneroText");
-
-    if (tituloInput && tituloHidden) {
-        const valorTitulo = (tituloInput.value || tituloHidden.value || "").trim();
-        tituloHidden.value = valorTitulo;
-        tituloText.textContent = valorTitulo || "Título del libro";
-    }
-
-    if (generoInput && generoHidden) {
-        const valorGenero = (generoInput.value || generoHidden.value || "").trim();
-        generoHidden.value = valorGenero;
-        generoText.textContent = valorGenero || "Género";
-    }
-}
-
-function abrirModalEditar(token, autorId, titulo, isbn, editorial, genero, edicion, anio, numeroPaginas, idioma, paisPublicacion, descripcion, estado) {
-    titulo = decodificarHtml(titulo);
-    isbn = decodificarHtml(isbn);
-    editorial = decodificarHtml(editorial);
-    genero = decodificarHtml(genero);
-    edicion = decodificarHtml(edicion);
-    idioma = decodificarHtml(idioma);
-    paisPublicacion = decodificarHtml(paisPublicacion);
-    descripcion = decodificarHtml(descripcion);
-
-    document.getElementById("editToken").value = token;
-    document.getElementById("editAutorId").value = autorId;
-
+function abrirModalEditar(libroToken, autorId, titulo, isbn, editorial, genero, edicion, anioPublicacion, numeroPaginas, idioma, paisPublicacion, descripcion, estado) {
+    document.getElementById("editToken").value = libroToken || "";
+    document.getElementById("editAutorId").value = autorId || "";
     document.getElementById("editTituloHidden").value = titulo || "";
-    document.getElementById("editTituloText").textContent = titulo || "Título del libro";
-    document.getElementById("titulo-search-edit").value = titulo || "";
-
     document.getElementById("editISBN").value = isbn || "";
     document.getElementById("editEditorial").value = editorial || "";
-
     document.getElementById("editGeneroHidden").value = genero || "";
-    document.getElementById("editGeneroText").textContent = genero || "Género";
-    document.getElementById("genero-search-edit").value = genero || "";
-
     document.getElementById("editEdicion").value = edicion || "";
-    document.getElementById("editAnioPublicacion").value = anio || "";
+    document.getElementById("editAnioPublicacion").value = anioPublicacion || "";
     document.getElementById("editNumeroPaginas").value = numeroPaginas || "";
-
     document.getElementById("editIdiomaHidden").value = idioma || "";
-    document.getElementById("editIdiomaText").textContent = idioma || "Idioma";
-    document.getElementById("idioma-search-edit").value = idioma || "";
-
     document.getElementById("editPaisPublicacion").value = paisPublicacion || "";
     document.getElementById("editDescripcion").value = descripcion || "";
-    const estadoEditEsActivo = String(estado).toLowerCase() === "true";
-    document.getElementById("editEstadoActivo").checked = estadoEditEsActivo;
-    document.getElementById("editEstadoInactivo").checked = !estadoEditEsActivo;
 
-    const autorOption = document.querySelector('#custom-select-autor-edit .option[data-value="' + autorId + '"]');
-    document.getElementById("editAutorText").textContent =
-        autorOption ? autorOption.textContent.trim() : "-- Seleccione un autor --";
+    document.getElementById("editEstadoActivo").checked = (estado === "true" || estado === true);
+    document.getElementById("editEstadoInactivo").checked = (estado === "false" || estado === false);
 
-    const edicionOption = document.querySelector('#custom-select-edicion-edit .option[data-value="' + edicion + '"]');
-    document.getElementById("editEdicionText").textContent =
-        edicionOption ? edicionOption.textContent.trim() : (edicion || "-- Seleccione una edición --");
+    document.getElementById("editAutorText").textContent = (autorId && autorId !== "") ? 
+        (document.querySelector(`#custom-select-autor-edit .select-options .option[data-value="${autorId}"]`)?.textContent || "-- Seleccione un autor --") : 
+        "-- Seleccione un autor --";
+    document.getElementById("editTituloText").textContent = titulo || "Título del libro";
+    document.getElementById("editGeneroText").textContent = genero || "Género";
+    document.getElementById("editIdiomaText").textContent = idioma || "Idioma";
+    document.getElementById("editEdicionText").textContent = edicion || "-- Seleccione una edición --";
 
-    sincronizarCamposEditar();
-    mostrarModalEditar();
+    document.getElementById("autor-search-edit").value = "";
+    document.getElementById("titulo-search-edit").value = "";
+    document.getElementById("genero-search-edit").value = "";
+    document.getElementById("idioma-search-edit").value = "";
+    document.getElementById("edicion-search-edit").value = "";
+
+    limpiarErrores('edit', ['AutorId', 'Titulo', 'ISBN', 'Editorial', 'Genero', 'Edicion', 'AñoPublicacion', 'NumeroPaginas', 'Idioma', 'PaisPublicacion', 'Descripcion']);
+
+    document.getElementById("modalEditar").style.display = "flex";
 }
 
 function cerrarModalEditar() {
     document.getElementById("modalEditar").style.display = "none";
+}
+
+function mostrarModalCrear() {
+    document.getElementById("modalCrear").style.display = "flex";
+}
+
+function cargarAutoresActivosCrear() {
+    const optionsContainer = document.querySelector('#custom-select-autor-create .select-options');
+    if (!optionsContainer) return;
+
+    fetch(`${window.location.pathname}?handler=AutoresActivos`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+        .then(response => response.ok ? response.json() : [])
+        .then(autores => {
+            optionsContainer.innerHTML = "";
+
+            (autores || []).forEach(autor => {
+                const option = document.createElement("div");
+                option.className = "option";
+                option.dataset.value = autor.id;
+                option.textContent = autor.displayText || `${autor.nombres || ""} ${autor.apellidos || ""}`.trim();
+                optionsContainer.appendChild(option);
+            });
+        })
+        .catch(() => { });
+}
+
+function mostrarModalEditar() {
+    document.getElementById("modalEditar").style.display = "flex";
 }
 
 function abrirModalCrear() {
@@ -867,12 +897,165 @@ function abrirModalCrear() {
     document.getElementById("createEstadoActivo").checked = true;
     document.getElementById("createEstadoInactivo").checked = false;
 
-    sincronizarCamposCrear();
+    limpiarErrores('create', ['AutorId', 'Titulo', 'ISBN', 'Editorial', 'Genero', 'Edicion', 'AñoPublicacion', 'NumeroPaginas', 'Idioma', 'PaisPublicacion', 'Descripcion']);
+
     mostrarModalCrear();
+    cargarAutoresActivosCrear();
+    sincronizarCamposCrear();
+}
+
+function abrirSelectorAutorCrear() {
+    const select = document.getElementById("custom-select-autor-create");
+    const search = document.getElementById("autor-search-create");
+
+    if (!select) return;
+
+    select.classList.add("active");
+
+    if (search) {
+        setTimeout(() => search.focus(), 50);
+    }
 }
 
 function cerrarModalCrear() {
     document.getElementById("modalCrear").style.display = "none";
+}
+
+function enviarFormularioCrearAjax(formulario) {
+    const formData = new FormData(formulario);
+    const errorSummary = document.getElementById('error-summary-create');
+
+    fetch(formulario.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            cerrarModalCrear();
+            location.reload();
+        } else {
+            mostrarErroresCrear(data.errors);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        errorSummary.style.display = 'block';
+        errorSummary.innerHTML = '<p>Error al procesar la solicitud</p>';
+    });
+}
+
+function enviarFormularioEditarAjax(formulario) {
+    const formData = new FormData(formulario);
+    const errorSummary = document.getElementById('error-summary-edit');
+
+    fetch(formulario.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            cerrarModalEditar();
+            location.reload();
+        } else {
+            mostrarErroresEditar(data.errors);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        errorSummary.style.display = 'block';
+        errorSummary.innerHTML = '<p>Error al procesar la solicitud</p>';
+    });
+}
+
+function mostrarErroresCrear(errors) {
+    const errorSummary = document.getElementById('error-summary-create');
+
+    limpiarErrores('create', ['AutorId', 'Titulo', 'ISBN', 'Editorial', 'Genero', 'Edicion', 'AñoPublicacion', 'NumeroPaginas', 'Idioma', 'PaisPublicacion', 'Descripcion']);
+
+    let hayErrores = false;
+    let mensajeResumen = '<strong>Errores encontrados:</strong><ul>';
+
+    Object.keys(errors).forEach(campo => {
+        const mensajeArray = errors[campo];
+        if (!Array.isArray(mensajeArray) || mensajeArray.length === 0) return;
+
+        const mensajeError = mensajeArray[0];
+        if (!mensajeError) return;
+
+        const nombreCampo = campo.replace('Libro.', '');
+        const elementoError = document.getElementById(`error-create-${nombreCampo}`);
+
+        if (elementoError) {
+            elementoError.textContent = mensajeError;
+            elementoError.style.display = 'block';
+            hayErrores = true;
+        }
+
+        mensajeResumen += `<li>${mensajeError}</li>`;
+    });
+
+    if (hayErrores) {
+        mensajeResumen += '</ul>';
+        errorSummary.innerHTML = mensajeResumen;
+        errorSummary.style.display = 'block';
+    }
+}
+
+function mostrarErroresEditar(errors) {
+    const errorSummary = document.getElementById('error-summary-edit');
+
+    limpiarErrores('edit', ['AutorId', 'Titulo', 'ISBN', 'Editorial', 'Genero', 'Edicion', 'AñoPublicacion', 'NumeroPaginas', 'Idioma', 'PaisPublicacion', 'Descripcion']);
+
+    let hayErrores = false;
+    let mensajeResumen = '<strong>Errores encontrados:</strong><ul>';
+
+    Object.keys(errors).forEach(campo => {
+        const mensajeArray = errors[campo];
+        if (!Array.isArray(mensajeArray) || mensajeArray.length === 0) return;
+
+        const mensajeError = mensajeArray[0];
+        if (!mensajeError) return;
+
+        const nombreCampo = campo.replace('Libro.', '');
+        const elementoError = document.getElementById(`error-edit-${nombreCampo}`);
+
+        if (elementoError) {
+            elementoError.textContent = mensajeError;
+            elementoError.style.display = 'block';
+            hayErrores = true;
+        }
+
+        mensajeResumen += `<li>${mensajeError}</li>`;
+    });
+
+    if (hayErrores) {
+        mensajeResumen += '</ul>';
+        errorSummary.innerHTML = mensajeResumen;
+        errorSummary.style.display = 'block';
+    }
+}
+
+function limpiarErrores(tipo, campos) {
+    campos.forEach(campo => {
+        const elemento = document.getElementById(`error-${tipo}-${campo}`);
+        if (elemento) {
+            elemento.textContent = '';
+            elemento.style.display = 'none';
+        }
+    });
+    const summary = document.getElementById(`error-summary-${tipo}`);
+    if (summary) {
+        summary.innerHTML = '';
+        summary.style.display = 'none';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -883,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const trigger = customSelect.querySelector('.select-trigger');
         const search = customSelect.querySelector('.select-search');
-        const options = customSelect.querySelectorAll('.option');
+        const optionsContainer = customSelect.querySelector('.select-options');
         const hiddenInput = document.getElementById(config.hiddenInputId);
         const selectText = document.getElementById(config.textId);
         let isOpen = false;
@@ -897,13 +1080,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(function () { search.focus(); }, 50);
                 if (!customSelect.classList.contains('custom-select-free')) {
                     search.value = '';
-                    options.forEach(function (opt) { opt.classList.remove('hidden'); });
+                    optionsContainer?.querySelectorAll('.option').forEach(function (opt) { opt.classList.remove('hidden'); });
                 }
             }
         });
 
-        document.addEventListener('click', function (e) {
-            if (!customSelect.contains(e.target)) {
+        document.addEventListener('click', function closeOnClickOutside(e) {
+            if (!customSelect.contains(e.target) && isOpen) {
                 isOpen = false;
                 customSelect.classList.remove('active');
 
@@ -915,9 +1098,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             }
-        });
+        }, { capture: false });
 
-        if (search) {
+        if (search && optionsContainer) {
             search.addEventListener('input', function () {
                 const searchTerm = this.value.toLowerCase();
 
@@ -926,19 +1109,24 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectText.textContent = this.value.trim() || config.defaultText;
                 }
 
-                options.forEach(function (option) {
+                optionsContainer.querySelectorAll('.option').forEach(function (option) {
                     const text = option.textContent.toLowerCase();
                     option.classList.toggle('hidden', !text.includes(searchTerm));
                 });
             });
-        }
 
-        options.forEach(function (option) {
-            option.addEventListener('click', function (e) {
+            search.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            optionsContainer.addEventListener('click', function (e) {
+                const option = e.target.closest('.option');
+                if (!option || !optionsContainer.contains(option)) return;
+
                 e.stopPropagation();
 
-                const value = this.dataset.value;
-                const text = this.textContent.trim();
+                const value = option.dataset.value;
+                const text = option.textContent.trim();
 
                 hiddenInput.value = value;
                 selectText.textContent = text;
@@ -948,15 +1136,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 isOpen = false;
                 customSelect.classList.remove('active');
             });
+        }
+    }
+
+    const formCrearLibro = document.getElementById('formCrearLibro');
+    if (formCrearLibro) {
+        formCrearLibro.addEventListener('submit', function (e) {
+            e.preventDefault();
+            sincronizarCamposCrear();
+            enviarFormularioCrearAjax(this);
         });
     }
 
-    function permitirSoloIsbn(id) {
-        const input = document.getElementById(id);
-        if (!input) return;
-
-        input.addEventListener("input", function () {
-            this.value = this.value.replace(/[^0-9xX-]/g, '');
+    const formEditarLibro = document.getElementById('formEditarLibro');
+    if (formEditarLibro) {
+        formEditarLibro.addEventListener('submit', function (e) {
+            e.preventDefault();
+            sincronizarCamposEditar();
+            enviarFormularioEditarAjax(this);
         });
     }
 
@@ -988,143 +1185,4 @@ window.onclick = function(e) {
     if (e.target === modalDetalle) cerrarModalDetalle();
 };
 </script>
-
-@if (!ViewData.ModelState.IsValid)
-{
-    var form = Request.HasFormContentType ? Request.Form : null;
-    var tokenForm = form?["token"].ToString() ?? "";
-    var autorForm = Js(form?["AutorId"].ToString());
-    var autorNuevoForm = Js(form?["NombreAutorNuevo"].ToString());
-    var tituloForm = Js(form?["Titulo"].ToString());
-    var isbnForm = Js(form?["ISBN"].ToString());
-    var editorialForm = Js(form?["Editorial"].ToString());
-    var generoForm = Js(form?["Genero"].ToString());
-    var edicionForm = Js(form?["Edicion"].ToString());
-    var anioForm = Js(form?["AñoPublicacion"].ToString());
-    var paginasForm = Js(form?["NumeroPaginas"].ToString());
-    var idiomaForm = Js(form?["Idioma"].ToString());
-    var paisForm = Js(form?["PaisPublicacion"].ToString());
-    var descripcionForm = Js(form?["Descripcion"].ToString());
-    var estadoForm = Js(string.IsNullOrWhiteSpace(form?["Estado"].ToString()) ? "true" : form?["Estado"].ToString());
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var esEdicion = '@tokenForm' !== '';
-
-            if (esEdicion) {
-                mostrarModalEditar();
-
-                var token = '@tokenForm';
-                var autorId = '@autorForm';
-                var titulo = decodificarHtml('@tituloForm');
-                var isbn = decodificarHtml('@isbnForm');
-                var editorial = decodificarHtml('@editorialForm');
-                var genero = decodificarHtml('@generoForm');
-                var edicion = decodificarHtml('@edicionForm');
-                var anio = '@anioForm';
-                var paginas = '@paginasForm';
-                var idioma = decodificarHtml('@idiomaForm');
-                var pais = decodificarHtml('@paisForm');
-                var descripcion = decodificarHtml('@descripcionForm');
-                var estado = '@estadoForm';
-
-                document.getElementById("editToken").value = token;
-                document.getElementById("editAutorId").value = autorId;
-
-                document.getElementById("editTituloHidden").value = titulo;
-                document.getElementById("editTituloText").textContent = titulo || "Título del libro";
-                document.getElementById("titulo-search-edit").value = titulo || "";
-
-                document.getElementById("editISBN").value = isbn || "";
-                document.getElementById("editEditorial").value = editorial || "";
-
-                document.getElementById("editGeneroHidden").value = genero;
-                document.getElementById("editGeneroText").textContent = genero || "Género";
-                document.getElementById("genero-search-edit").value = genero || "";
-
-                document.getElementById("editEdicion").value = edicion || "";
-                document.getElementById("editAnioPublicacion").value = anio || "";
-                document.getElementById("editNumeroPaginas").value = paginas || "";
-
-                document.getElementById("editIdiomaHidden").value = idioma || "";
-                document.getElementById("editIdiomaText").textContent = idioma || "Idioma";
-                document.getElementById("idioma-search-edit").value = idioma || "";
-
-                document.getElementById("editPaisPublicacion").value = pais || "";
-                document.getElementById("editDescripcion").value = descripcion || "";
-                document.getElementById("editEstadoActivo").checked = estado === "True";
-                document.getElementById("editEstadoInactivo").checked = estado !== "True";
-
-                const autorOption = document.querySelector('#custom-select-autor-edit .option[data-value="' + autorId + '"]');
-                document.getElementById("editAutorText").textContent =
-                    autorOption ? autorOption.textContent.trim() : "-- Seleccione un autor --";
-
-                const edicionOption = document.querySelector('#custom-select-edicion-edit .option[data-value="' + edicion + '"]');
-                document.getElementById("editEdicionText").textContent =
-                    edicionOption ? edicionOption.textContent.trim() : (edicion || "-- Seleccione una edición --");
-            } else {
-                mostrarModalCrear();
-
-                var autorId = '@autorForm';
-                var autorNuevo = decodificarHtml('@autorNuevoForm');
-                var titulo = decodificarHtml('@tituloForm');
-                var isbn = decodificarHtml('@isbnForm');
-                var editorial = decodificarHtml('@editorialForm');
-                var genero = decodificarHtml('@generoForm');
-                var edicion = decodificarHtml('@edicionForm');
-                var anio = '@anioForm';
-                var paginas = '@paginasForm';
-                var idioma = decodificarHtml('@idiomaForm');
-                var pais = decodificarHtml('@paisForm');
-                var descripcion = decodificarHtml('@descripcionForm');
-
-                document.getElementById("createAutorId").value = autorId || "";
-                document.getElementById("createAutorNuevo").value = autorNuevo || "";
-
-                if (autorId) {
-                    const autorOpt = document.querySelector('#custom-select-autor-create .option[data-value="' + autorId + '"]');
-                    if (autorOpt) {
-                        document.getElementById("createAutorText").textContent = autorOpt.textContent.trim();
-                        document.getElementById("autor-search-create").value = autorOpt.textContent.trim();
-                    }
-                } else if (autorNuevo) {
-                    document.getElementById("createAutorText").textContent = autorNuevo;
-                    document.getElementById("autor-search-create").value = autorNuevo;
-                }
-
-                document.getElementById("createTituloHidden").value = titulo;
-                document.getElementById("createTituloText").textContent = titulo || "Título del libro";
-                document.getElementById("titulo-search-create").value = titulo || "";
-
-                document.getElementById("createISBN").value = isbn || "";
-                document.getElementById("createEditorial").value = editorial || "";
-
-                document.getElementById("createGeneroHidden").value = genero;
-                document.getElementById("createGeneroText").textContent = genero || "Género";
-                document.getElementById("genero-search-create").value = genero || "";
-
-                document.getElementById("createEdicion").value = edicion || "";
-                const edicionOption = document.querySelector('#custom-select-edicion-create .option[data-value="' + edicion + '"]');
-                document.getElementById("createEdicionText").textContent =
-                    edicionOption ? edicionOption.textContent.trim() : (edicion || "-- Seleccione una edición --");
-
-                document.getElementById("createAnioPublicacion").value = anio || "";
-                document.getElementById("createNumeroPaginas").value = paginas || "";
-
-                document.getElementById("createIdiomaHidden").value = idioma;
-                document.getElementById("createIdiomaText").textContent = idioma || "Idioma";
-                document.getElementById("idioma-search-create").value = idioma || "";
-
-                document.getElementById("createPaisPublicacion").value = pais || "";
-                document.getElementById("createDescripcion").value = descripcion || "";
-
-                const estadoCreateEsActivo = String('@estadoForm').toLowerCase() === "true";
-                document.getElementById("createEstadoActivo").checked = estadoCreateEsActivo;
-                document.getElementById("createEstadoInactivo").checked = !estadoCreateEsActivo;
-            }
-        });
-
-
-    </script>
-}
 }

@@ -1,6 +1,5 @@
 ﻿using Frontend.Dtos;
 using Frontend.Adapters;
-using Frontend.Dtos;
 using Frontend.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -34,7 +33,14 @@ public class LibroModel : PageModel
             return LocalRedirect("/");
         }
 
+        CargarDatos();
+        return Page();
+    }
+
+    private void CargarDatos()
+    {
         Libros = _libroServicio.Select();
+        LibroTokens = new Dictionary<int, string>();
 
         foreach (var l in Libros)
         {
@@ -43,7 +49,6 @@ public class LibroModel : PageModel
 
         AutoresNombres = _libroServicio.ObtenerNombresAutores();
         Autores = _libroServicio.ObtenerAutoresActivos();
-        return Page();
     }
 
     public IActionResult OnGetAutoresActivos()
@@ -82,7 +87,6 @@ public class LibroModel : PageModel
 
         if (result.IsFailure)
         {
-            // Opcional: mostrar mensaje de error
         }
 
         return RedirectToPage();
@@ -105,19 +109,14 @@ public class LibroModel : PageModel
     {
         if (!EsAdminOBibliotecario())
         {
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return new JsonResult(new { success = false, redirect = "/Index" });
-            }
-
             return LocalRedirect("/");
         }
 
         if (!_routeTokenService.TryObtenerId(token, out var id))
         {
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return new JsonResult(new { success = false, errors = new Dictionary<string, string> { { "", "Petición inválida o token expirado." } } });
-            return NotFound();
+            ModelState.AddModelError("token", "Petición inválida o token expirado.");
+            CargarDatos();
+            return Page();
         }
 
         var dto = new LibroDto
@@ -142,19 +141,35 @@ public class LibroModel : PageModel
 
         if (resultado.IsFailure)
         {
-            ModelState.AddModelError(resultado.Error.Code.Split('.').LastOrDefault() ?? "Error", resultado.Error.Message);
+            AgregarError(resultado.Error);
         }
 
         if (!ModelState.IsValid)
         {
-            var listaErrores = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).FirstOrDefault()
-            );
-            return new JsonResult(new { success = false, errors = listaErrores });
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                var errors = ModelState
+                    .Where(kvp => kvp.Value.Errors.Count > 0)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList());
+                return new JsonResult(new { success = false, errors = errors });
+            }
+
+            CargarDatos();
+            return Page();
         }
 
-        return new JsonResult(new { success = true });
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return new JsonResult(new { success = true });
+        }
+
+        return RedirectToPage();
+    }
+
+    private void AgregarError(Error error)
+    {
+        var key = error.Code.Split('.').LastOrDefault() ?? string.Empty;
+        ModelState.AddModelError(key, error.Message);
     }
 
     public IActionResult OnPostCrear(
@@ -173,18 +188,23 @@ public class LibroModel : PageModel
     {
         if (!EsAdminOBibliotecario())
         {
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return new JsonResult(new { success = false, redirect = "/Index" });
-            }
-
             return LocalRedirect("/");
         }
 
         ModelState.Remove("AutorId");
 
+        var autorEntrada = Request.Form["AutorId"].ToString();
         int? AutorId = null;
-        if (int.TryParse(Request.Form["AutorId"], out var parsedId)) AutorId = parsedId;
+        if (int.TryParse(autorEntrada, out var parsedId))
+        {
+            AutorId = parsedId;
+        }
+        else if (string.IsNullOrWhiteSpace(NombreAutorNuevo) && !string.IsNullOrWhiteSpace(autorEntrada))
+        {
+            NombreAutorNuevo = autorEntrada;
+        }
+
+        NombreAutorNuevo = string.IsNullOrWhiteSpace(NombreAutorNuevo) ? null : NombreAutorNuevo.Trim();
 
         var dto = new LibroDto
         {
@@ -207,19 +227,30 @@ public class LibroModel : PageModel
 
         if (resultado.IsFailure)
         {
-            ModelState.AddModelError(resultado.Error.Code.Split('.').LastOrDefault() ?? "Error", resultado.Error.Message);
+            AgregarError(resultado.Error);
         }
 
         if (!ModelState.IsValid)
         {
-            var listaErrores = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).FirstOrDefault()
-            );
-            return new JsonResult(new { success = false, errors = listaErrores });
+            // Si es una solicitud AJAX, devolver JSON
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                var errors = ModelState
+                    .Where(kvp => kvp.Value.Errors.Count > 0)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList());
+                return new JsonResult(new { success = false, errors = errors });
+            }
+
+            CargarDatos();
+            return Page();
         }
 
-        return new JsonResult(new { success = true });
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return new JsonResult(new { success = true });
+        }
+
+        return RedirectToPage();
     }
 
     private int? ObtenerUsuarioSesionId()
