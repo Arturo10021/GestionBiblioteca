@@ -518,6 +518,27 @@
     background: #1d1d1d;
 }
 
+.prestamo-total-libros {
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 0 2px;
+    color: #d1d5db;
+    font-size: 13px;
+}
+
+.prestamo-total-libros strong {
+    color: #e5e7eb;
+    font-weight: 800;
+}
+
+.prestamo-total-libros span {
+    color: #f9fafb;
+    font-weight: 800;
+}
+
 .tabla-input {
     min-width: 200px;
     padding-top: 6px;
