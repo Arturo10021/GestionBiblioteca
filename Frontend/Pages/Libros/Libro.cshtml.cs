@@ -46,6 +46,26 @@ public class LibroModel : PageModel
         return Page();
     }
 
+    public IActionResult OnGetAutoresActivos()
+    {
+        if (!EsAdminOBibliotecario())
+        {
+            return Unauthorized();
+        }
+
+        var autores = _libroServicio.ObtenerAutoresActivos();
+        var resultado = autores.Select(a => new
+        {
+            id = a.AutorId,
+            nombres = (a.Nombres ?? "").ToDisplayName(),
+            apellidos = (a.Apellidos ?? "").ToDisplayName(),
+            nacionalidad = a.Nacionalidad,
+            displayText = $"{(a.Nombres ?? "").ToDisplayName()} {(a.Apellidos ?? "").ToDisplayName()}{(!string.IsNullOrWhiteSpace(a.Nacionalidad) ? $" ({a.Nacionalidad})" : "")}"
+        }).ToList();
+
+        return new JsonResult(resultado);
+    }
+
     public IActionResult OnPostEliminar(string token)
     {
         if (!EsAdminOBibliotecario())
