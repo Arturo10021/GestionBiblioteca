@@ -58,8 +58,15 @@ public class UsuariosController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var usuario = await _usuarioService.CreateAsync(dto);
-        return Ok(usuario);
+        try
+        {
+            var usuario = await _usuarioService.CreateAsync(dto);
+            return Ok(usuario);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]

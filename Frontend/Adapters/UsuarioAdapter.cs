@@ -115,7 +115,9 @@ public class UsuarioAdapter : IUsuarioServicio
         try
         {
             var response = await _http.PostAsJsonAsync("api/usuarios", d, ct);
-            return response.IsSuccessStatusCode ? Result.Success() : Result.Failure(new Error("Create", "Error al crear usuario"));
+            return response.IsSuccessStatusCode
+                ? Result.Success()
+                : Result.Failure(new Error("Create", await LeerErrorAsync(response, ct)));
         }
         catch (Exception ex)
         {
@@ -165,5 +167,26 @@ public class UsuarioAdapter : IUsuarioServicio
         {
             return null;
         }
+    }
+
+    private static async Task<string> LeerErrorAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        var content = await response.Content.ReadAsStringAsync(ct);
+        if (string.IsNullOrWhiteSpace(content))
+            return "Error al crear usuario.";
+
+        try
+        {
+            using var json = JsonDocument.Parse(content);
+            if (json.RootElement.TryGetProperty("error", out var error))
+                return error.GetString() ?? "Error al crear usuario.";
+            if (json.RootElement.TryGetProperty("message", out var message))
+                return message.GetString() ?? "Error al crear usuario.";
+        }
+        catch
+        {
+        }
+
+        return content;
     }
 }

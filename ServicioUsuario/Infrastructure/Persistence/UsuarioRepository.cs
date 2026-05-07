@@ -230,12 +230,14 @@ public class UsuarioRepository : IRepository<Usuario, int>
                     command.Parameters.AddWithValue("@Estado", entity.Estado);
                     command.Parameters.AddWithValue("@CI", entity.CI ?? (object)DBNull.Value);
                     command.ExecuteNonQuery();
+                    entity.UsuarioId = Convert.ToInt32(command.LastInsertedId);
                 }
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al insertar usuario: {ex.Message}");
+            throw;
         }
     }
 

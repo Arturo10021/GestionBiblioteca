@@ -88,11 +88,12 @@ public class IndexModel : PageModel
 
             var resultadoLector = _usuarioServicio.CrearLector(lectorDto, usuarioSesionId.Value);
 
-            if (resultadoLector.IsFailure)
-            {
-                ModelState.AddModelError(string.Empty, resultadoLector.Error.Message);
-                CargarUsuarios();
-                return Page();
+        if (resultadoLector.IsFailure)
+        {
+            MensajeError = resultadoLector.Error.Message;
+            ModelState.AddModelError(string.Empty, resultadoLector.Error.Message);
+            CargarUsuarios();
+            return Page();
             }
 
             TempData["MensajeOk"] = "Lector creado correctamente.";
@@ -103,12 +104,13 @@ public class IndexModel : PageModel
 
         if (resultado.IsFailure)
         {
+            MensajeError = resultado.Error.Message;
             ModelState.AddModelError(string.Empty, resultado.Error.Message);
             CargarUsuarios();
             return Page();
         }
 
-        TempData["MensajeOk"] = "UsuarioDto creado correctamente. Se enviaron credenciales por correo.";
+        TempData["MensajeOk"] = "Usuario creado correctamente. Se enviaron credenciales por correo.";
         return RedirectToPage();
     }
 
@@ -141,7 +143,7 @@ public class IndexModel : PageModel
             return Page();
         }
 
-        TempData["MensajeOk"] = "UsuarioDto dado de baja correctamente.";
+        TempData["MensajeOk"] = "Usuario dado de baja correctamente.";
         return RedirectToPage();
     }
 
