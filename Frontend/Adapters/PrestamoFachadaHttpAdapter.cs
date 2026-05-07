@@ -54,13 +54,14 @@ public class PrestamoFachadaHttpAdapter : IPrestamoFachada
     {
         try
         {
-            var response = _http.PostAsJsonAsync("api/prestamos/multiple", new
+            var ejemplares = ejemplarIds.Select(id => new { ejemplarId = id, observacionesSalida }).ToList();
+
+            var response = _http.PostAsJsonAsync("api/prestamos", new
             {
                 lectorId,
-                ejemplarIds,
+                ejemplares,
                 fechaDevolucionEsperada,
-                usuarioSesionId,
-                observacionesSalida
+                usuarioSesionId
             }).Result;
 
             if (!response.IsSuccessStatusCode)
@@ -79,10 +80,12 @@ public class PrestamoFachadaHttpAdapter : IPrestamoFachada
     {
         try
         {
-            var response = _http.PostAsJsonAsync("api/prestamos/multiple-detallado", new
+            var ejemplares = detallesEjemplares.Select(d => new { ejemplarId = d.EjemplarId, observacionesSalida = d.ObservacionesSalida }).ToList();
+
+            var response = _http.PostAsJsonAsync("api/prestamos", new
             {
                 lectorId,
-                detallesEjemplares,
+                ejemplares,
                 fechaDevolucionEsperada,
                 usuarioSesionId
             }).Result;

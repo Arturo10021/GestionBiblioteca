@@ -148,7 +148,7 @@
                     </div>
                 </div>
 
-                <p class="panel-copy">Añade hasta tres ejemplares. Cada uno puede llevar una observación de salida.</p>
+                <p class="panel-copy">Añade hasta cinco ejemplares. Cada uno puede llevar una observación de salida.</p>
 
                 <div class="ejemplares-layout">
                     <div class="ejemplares-selector-column">
@@ -746,8 +746,8 @@
                 return;
             }
 
-            if (ejemplaresSeleccionados.length >= 3) {
-                mostrarMensajeError('No se pueden prestar más de 3 ejemplares a la vez.', 'error-EjemplarData');
+            if (ejemplaresSeleccionados.length >= 5) {
+                mostrarMensajeError('No se pueden prestar más de 5 ejemplares a la vez.', 'error-EjemplarData');
                 return;
             }
 
@@ -884,8 +884,8 @@
                 valido = false;
             }
 
-            if (ejemplaresSeleccionados.length > 3) {
-                mostrarMensajeError('No se pueden prestar más de 3 ejemplares a la vez.', 'error-EjemplarData');
+            if (ejemplaresSeleccionados.length > 5) {
+                mostrarMensajeError('No se pueden prestar más de 5 ejemplares a la vez.', 'error-EjemplarData');
                 valido = false;
             }
 
