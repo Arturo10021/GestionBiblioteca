@@ -52,4 +52,16 @@ public class AutoresController : ControllerBase
         var result = _autorServicio.Delete(id, sid);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
     }
+
+    [HttpGet("activos")]
+    public ActionResult<Dictionary<int, string>> GetActivos()
+    {
+        return Ok(_autorServicio.ObtenerAutoresActivos());
+    }
+
+    [HttpGet("{id}/existe")]
+    public ActionResult<bool> Existe(int id)
+    {
+        return Ok(_autorServicio.ExisteAutorActivo(id));
+    }
 }

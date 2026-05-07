@@ -20,7 +20,16 @@ public class EjemplarAdapter : IEjemplarServicio
     public Dictionary<int, string> ObtenerTitulosLibros() => CallGet<Dictionary<int, string>>("api/libros/titulos") ?? new();
     public IEnumerable<LibroDto> ObtenerLibrosActivos() =>
         (CallGet<List<LibroDto>>("api/libros") ?? new()).Where(l => l.Estado);
-    public bool ExisteLibroActivo(int id) => true;
+    public bool ExisteLibroActivo(int id)
+    {
+        try
+        {
+            var r = _http.GetAsync($"api/ejemplares/libro/{id}/existe").Result;
+            if (!r.IsSuccessStatusCode) return false;
+            return r.Content.ReadFromJsonAsync<bool>().Result;
+        }
+        catch { return false; }
+    }
     public Dictionary<int, string> ObtenerEjemplaresDisponibles() => CallGet<Dictionary<int, string>>("api/ejemplares/disponibles") ?? new();
     public Result ValidarEjemplar(EjemplarDto e) => Result.Success();
 

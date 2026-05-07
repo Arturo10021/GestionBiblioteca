@@ -19,7 +19,16 @@ public class LibroAdapter : ILibroServicio
     public Result Delete(int id, int? uid) => CallDelete($"api/libros/{id}");
     public Dictionary<int, string> ObtenerNombresAutores() => CallGet<Dictionary<int, string>>("api/libros/autores-nombres") ?? new();
     public IEnumerable<AutorDto> ObtenerAutoresActivos() => CallGet<List<AutorDto>>("api/libros/autores-activos") ?? new();
-    public bool ExisteAutorActivo(int id) => true;
+    public bool ExisteAutorActivo(int id)
+    {
+        try
+        {
+            var r = _http.GetAsync($"api/autores/{id}/existe").Result;
+            if (!r.IsSuccessStatusCode) return false;
+            return r.Content.ReadFromJsonAsync<bool>().Result;
+        }
+        catch { return false; }
+    }
     public int InsertarAutorYObtenerID(string n, int? uid) => 0;
 
     private T? CallGet<T>(string url) where T : class { try { var r = _http.GetAsync(url).Result; r.EnsureSuccessStatusCode(); return r.Content.ReadFromJsonAsync<T>().Result; } catch { return null; } }

@@ -60,4 +60,10 @@ public class EjemplaresController : ControllerBase
         var result = _ejemplarServicio.Delete(ejemplar);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
     }
+
+    [HttpGet("libro/{libroId}/existe")]
+    public ActionResult<bool> ExisteLibro(int libroId)
+    {
+        return Ok(_ejemplarServicio.ExisteLibroActivo(libroId));
+    }
 }

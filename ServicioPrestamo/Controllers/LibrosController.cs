@@ -76,4 +76,10 @@ public class LibrosController : ControllerBase
         var result = _libroServicio.Delete(id, null);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
     }
+
+    [HttpGet("{id}/existe")]
+    public ActionResult<bool> Existe(int id)
+    {
+        return Ok(_libroServicio.ExisteAutorActivo(id));
+    }
 }
