@@ -1,4 +1,5 @@
 using ServicioUsuario.Application.Dtos;
+using ServicioUsuario.Application.Interfaces;
 using ServicioUsuario.Domain.Entities;
 using ServicioUsuario.Domain.Ports;
 using ServicioUsuario.Infrastructure.Persistence;
@@ -23,10 +24,12 @@ public interface IUsuarioService
 public class UsuarioService : IUsuarioService
 {
     private readonly UsuarioRepository _repositorio;
+    private readonly IUserCredentialProvisioningService _credentialProvisioning;
 
-    public UsuarioService(UsuarioRepository repositorio)
+    public UsuarioService(UsuarioRepository repositorio, IUserCredentialProvisioningService credentialProvisioning)
     {
         _repositorio = repositorio;
+        _credentialProvisioning = credentialProvisioning;
     }
 
     public Task<List<UsuarioDto>> GetAllAsync()
@@ -57,7 +60,7 @@ public class UsuarioService : IUsuarioService
         return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
     }
 
-    public Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
+    public async Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Nombres)
             || string.IsNullOrWhiteSpace(dto.PrimerApellido)
@@ -77,15 +80,6 @@ public class UsuarioService : IUsuarioService
             throw new InvalidOperationException("Ya existe un usuario registrado con ese correo.");
         }
 
-        var nombreUsuario = !string.IsNullOrWhiteSpace(dto.NombreUsuario)
-            ? dto.NombreUsuario
-            : (!string.IsNullOrWhiteSpace(dto.CI) ? dto.CI : dto.Email);
-
-        if (!string.IsNullOrWhiteSpace(nombreUsuario) && _repositorio.ExisteNombreUsuario(nombreUsuario))
-        {
-            throw new InvalidOperationException("Ya existe un usuario con ese nombre de usuario.");
-        }
-
         var usuario = new Usuario
         {
             CI = dto.CI,
@@ -93,12 +87,16 @@ public class UsuarioService : IUsuarioService
             PrimerApellido = NormalizeDisplayName(dto.PrimerApellido),
             SegundoApellido = NormalizeDisplayName(dto.SegundoApellido),
             Email = dto.Email,
-            NombreUsuario = nombreUsuario,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? "temporal123"),
             Rol = dto.Rol,
             Estado = true,
             FechaCreacion = DateTime.UtcNow
         };
+
+        // Generate unique username, secure password, and send email
+        var provisioningResult = await _credentialProvisioning.PrepareAndNotifyAsync(usuario);
+
+        usuario.NombreUsuario = provisioningResult.GeneratedUserName;
+        usuario.PasswordHash = provisioningResult.PasswordHash;
 
         _repositorio.Insert(usuario);
 
@@ -111,7 +109,7 @@ public class UsuarioService : IUsuarioService
             throw new InvalidOperationException("No se pudo confirmar el registro del usuario.");
         }
 
-        return Task.FromResult(MapToDto(usuarioPersistido));
+        return MapToDto(usuarioPersistido);
     }
 
     public Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto)

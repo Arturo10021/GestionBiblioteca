@@ -1,7 +1,9 @@
 using Scalar.AspNetCore;
+using ServicioUsuario.Application.Interfaces;
 using ServicioUsuario.Application.Services;
 using ServicioUsuario.Domain.Ports;
 using ServicioUsuario.Infrastructure.Configuration;
+using ServicioUsuario.Infrastructure.Email;
 using ServicioUsuario.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +13,14 @@ ConfigurationSingleton.Initialize(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-// Registrar repositorio e inyectar en el servicio
+// Repositorio
 builder.Services.AddSingleton<UsuarioRepository>();
+
+// Email sender
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+
+// Servicios
+builder.Services.AddSingleton<IUserCredentialProvisioningService, UserCredentialProvisioningService>();
 builder.Services.AddSingleton<IUsuarioService, UsuarioService>();
 
 var app = builder.Build();
