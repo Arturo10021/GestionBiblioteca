@@ -232,7 +232,7 @@ else
                                 var nombres = (autorRow.Nombres ?? "").ToDisplayName();
                                 var apellidos = (autorRow.Apellidos ?? "").ToDisplayName();
                                 var nacionalidad = autorRow.Nacionalidad;
-                                var textoAutor = $"{apellidos} {nombres}" + (!string.IsNullOrWhiteSpace(nacionalidad) ? $" ({nacionalidad})" : "");
+                                var textoAutor = $"{nombres} {apellidos}" + (!string.IsNullOrWhiteSpace(nacionalidad) ? $" ({nacionalidad})" : "");
                                 <div class="option" data-value="@aId">@textoAutor</div>
                             }
                         </div>
@@ -403,11 +403,12 @@ else
                         <div class="select-options">
                             @foreach (var autorRow in Model.Autores)
                             {
+                                if (!autorRow.Estado) continue;
                                 var aId = autorRow.AutorId;
                                 var nombres = (autorRow.Nombres ?? "").ToDisplayName();
                                 var apellidos = (autorRow.Apellidos ?? "").ToDisplayName();
                                 var nacionalidad = autorRow.Nacionalidad;
-                                var displayText = $"{apellidos} {nombres}{(!string.IsNullOrWhiteSpace(nacionalidad) ? $" ({nacionalidad})" : "")}";
+                                var displayText = $"{nombres} {apellidos}{(!string.IsNullOrWhiteSpace(nacionalidad) ? $" ({nacionalidad})" : "")}";
                                 <div class="option" data-value="@aId">@displayText</div>
                             }
                         </div>
@@ -950,134 +951,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    initCustomSelect({ selectId: 'custom-select-autor-edit', hiddenInputId: 'editAutorId', textId: 'editAutorText', defaultText: '-- Seleccione un autor --' });
-    initCustomSelect({ selectId: 'custom-select-edicion-edit', hiddenInputId: 'editEdicion', textId: 'editEdicionText', defaultText: '-- Seleccione una edición --' });
-    initCustomSelect({ selectId: 'custom-select-autor-create', hiddenInputId: 'createAutorId', textId: 'createAutorText', defaultText: 'Seleccione un autor...' });
-    initCustomSelect({ selectId: 'custom-select-edicion-create', hiddenInputId: 'createEdicion', textId: 'createEdicionText', defaultText: '-- Seleccione una edición --' });
-    initCustomSelect({ selectId: 'custom-select-titulo-create', hiddenInputId: 'createTituloHidden', textId: 'createTituloText', defaultText: 'Título del libro' });
-    initCustomSelect({ selectId: 'custom-select-titulo-edit', hiddenInputId: 'editTituloHidden', textId: 'editTituloText', defaultText: 'Título del libro' });
-    initCustomSelect({ selectId: 'custom-select-genero-create', hiddenInputId: 'createGeneroHidden', textId: 'createGeneroText', defaultText: 'Género' });
-    initCustomSelect({ selectId: 'custom-select-genero-edit', hiddenInputId: 'editGeneroHidden', textId: 'editGeneroText', defaultText: 'Género' });
-    initCustomSelect({ selectId: 'custom-select-idioma-create', hiddenInputId: 'createIdiomaHidden', textId: 'createIdiomaText', defaultText: 'Idioma' });
-    initCustomSelect({ selectId: 'custom-select-idioma-edit', hiddenInputId: 'editIdiomaHidden', textId: 'editIdiomaText', defaultText: 'Idioma' });
-
-         const formCrear = document.getElementById("formCrearLibro");
-        if (formCrear) {
-            formCrear.addEventListener("submit", async function (e) {
-                e.preventDefault();
-
-                // 1. Limpiar todos los errores visuales antes de empezar
-                formCrear.querySelectorAll('.text-error').forEach(el => {
-                    el.textContent = '';
-                    el.style.display = 'none';
-                });
-                const summary = document.getElementById("error-summary-create");
-                if(summary) summary.style.display = 'none';
-
-                sincronizarCamposCrear();
-
-                const formData = new FormData(this);
-
-                try {
-                    const response = await fetch('?handler=Crear', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        window.location.reload();
-                    } else {
-                        // 2. Mostrar los nuevos errores
-                        for (const [campo, mensaje] of Object.entries(result.errors)) {
-                            // Buscamos por el ID que creamos: error-create-[NombreDelCampo]
-                            const spanError = document.getElementById(`error-create-${campo}`);
-
-                            if (spanError) {
-                                spanError.textContent = mensaje;
-                                spanError.style.display = 'block'; // Lo hacemos visible
-                            } else if (campo === "") {
-                                // Error general del modelo
-                                if(summary) {
-                                    summary.textContent = mensaje;
-                                    summary.style.display = 'block';
-                                }
-                            } else {
-                                console.warn("No se encontró span para el campo:", campo);
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error en la comunicación:", error);
-                }
-            });
-        }
-
-        const formEditar = document.getElementById("formEditarLibro");
-        if (formEditar) {
-            formEditar.addEventListener("submit", async function (e) {
-                e.preventDefault(); // Evita la recarga de página brusca
-
-                // 1. Limpiar todos los errores visuales del modal EDITAR
-                formEditar.querySelectorAll('.text-error').forEach(el => {
-                    el.textContent = '';
-                    el.style.display = 'none';
-                });
-                const summaryEdit = document.getElementById("error-summary-edit");
-                if (summaryEdit) summaryEdit.style.display = 'none';
-
-                // Tu lógica de custom selects existente
-                sincronizarCamposEditar();
-
-                const formData = new FormData(this);
-
-                try {
-                    const response = await fetch('?handler=Editar', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            // Token de seguridad obligatorio
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        // Si funcionó, recargamos la página completa para ver el libro actualizado en la tabla
-                        window.location.reload();
-                    } else {
-                        // Si falló, mostramos los nuevos errores rojos en el modal EDITAR
-                        for (const [campo, mensaje] of Object.entries(result.errors)) {
-                            // Buscamos por el ID específico que creamos: error-edit-[NombreDelCampo]
-                            const spanError = document.getElementById(`error-edit-${campo}`);
-
-                            if (spanError) {
-                                spanError.textContent = mensaje;
-                                spanError.style.display = 'block'; // Lo hacemos visible
-                            } else if (campo === "") {
-                                // Error general del modelo
-                                if(summaryEdit) {
-                                    summaryEdit.textContent = mensaje;
-                                    summaryEdit.style.display = 'block';
-                                }
-                            } else {
-                                console.warn("No span found for edit field:", campo);
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error communicating with Edit handler:", error);
-                }
-            });
-        }
-
     function permitirSoloIsbn(id) {
         const input = document.getElementById(id);
         if (!input) return;
@@ -1089,6 +962,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     permitirSoloIsbn("createISBN");
     permitirSoloIsbn("editISBN");
+
+    initCustomSelect({ selectId: 'custom-select-autor-create', hiddenInputId: 'createAutorId', textId: 'createAutorText', defaultText: 'Seleccione un autor...' });
+    initCustomSelect({ selectId: 'custom-select-titulo-create', hiddenInputId: 'createTituloHidden', textId: 'createTituloText', defaultText: 'Título del libro' });
+    initCustomSelect({ selectId: 'custom-select-genero-create', hiddenInputId: 'createGeneroHidden', textId: 'createGeneroText', defaultText: 'Género' });
+    initCustomSelect({ selectId: 'custom-select-edicion-create', hiddenInputId: 'createEdicion', textId: 'createEdicionText', defaultText: '-- Seleccione una edición --' });
+    initCustomSelect({ selectId: 'custom-select-idioma-create', hiddenInputId: 'createIdiomaHidden', textId: 'createIdiomaText', defaultText: 'Idioma' });
+
+    initCustomSelect({ selectId: 'custom-select-autor-edit', hiddenInputId: 'editAutorId', textId: 'editAutorText', defaultText: '-- Seleccione un autor --' });
+    initCustomSelect({ selectId: 'custom-select-titulo-edit', hiddenInputId: 'editTituloHidden', textId: 'editTituloText', defaultText: 'Título del libro' });
+    initCustomSelect({ selectId: 'custom-select-genero-edit', hiddenInputId: 'editGeneroHidden', textId: 'editGeneroText', defaultText: 'Género' });
+    initCustomSelect({ selectId: 'custom-select-edicion-edit', hiddenInputId: 'editEdicion', textId: 'editEdicionText', defaultText: '-- Seleccione una edición --' });
+    initCustomSelect({ selectId: 'custom-select-idioma-edit', hiddenInputId: 'editIdiomaHidden', textId: 'editIdiomaText', defaultText: 'Idioma' });
 });
 
 window.onclick = function(e) {

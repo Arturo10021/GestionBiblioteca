@@ -245,10 +245,9 @@
 
             <input type="hidden"
                    id="editEstadoHidden"
-                   name="Estado"
                    value="@(editEstadoSeleccionado ? "true" : "false")" />
 
-            <select id="editEstado">
+            <select id="editEstado" name="Estado">
                 <option value="true" selected="@(editEstadoSeleccionado ? "selected" : null)">Activo</option>
                 <option value="false" selected="@(!editEstadoSeleccionado ? "selected" : null)">Inactivo</option>
             </select>
