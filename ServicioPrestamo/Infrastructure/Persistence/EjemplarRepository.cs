@@ -128,6 +128,7 @@ public class EjemplarRepository : IRepository<Ejemplar, int>
                         e.Estado
                     FROM ejemplar e
                     INNER JOIN libro l ON e.LibroId = l.LibroId
+                    WHERE e.Estado = 1
                     ORDER BY l.Titulo ASC;";
 
         using var command = new MySqlCommand(query, connection);

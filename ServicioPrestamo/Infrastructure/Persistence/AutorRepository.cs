@@ -112,6 +112,7 @@ public class AutorRepository : IRepository<Autor, int>
                              FechaRegistro,
                              UltimaActualizacion
                          FROM autor
+                         WHERE Estado = 1
                          ORDER BY Nombres ASC;";
 
         using var command = connection.CreateCommand();
