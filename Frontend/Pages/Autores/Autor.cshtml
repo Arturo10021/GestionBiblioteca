@@ -29,26 +29,26 @@
         || ViewData.ModelState["Estado"]?.AttemptedValue == "True"
         || ViewData.ModelState["Estado"]?.AttemptedValue == "on";
 
-    string createNombres = ViewData.ModelState.ContainsKey("Autor.Nombres")
-        ? ViewData.ModelState["Autor.Nombres"]?.AttemptedValue ?? ""
+    string createNombres = ViewData.ModelState.ContainsKey("AutorDto.Nombres")
+        ? ViewData.ModelState["AutorDto.Nombres"]?.AttemptedValue ?? ""
         : "";
 
-    string createApellidos = ViewData.ModelState.ContainsKey("Autor.Apellidos")
-        ? ViewData.ModelState["Autor.Apellidos"]?.AttemptedValue ?? ""
+    string createApellidos = ViewData.ModelState.ContainsKey("AutorDto.Apellidos")
+        ? ViewData.ModelState["AutorDto.Apellidos"]?.AttemptedValue ?? ""
         : "";
 
-    string createNacionalidad = ViewData.ModelState.ContainsKey("Autor.Nacionalidad")
-        ? ViewData.ModelState["Autor.Nacionalidad"]?.AttemptedValue ?? ""
+    string createNacionalidad = ViewData.ModelState.ContainsKey("AutorDto.Nacionalidad")
+        ? ViewData.ModelState["AutorDto.Nacionalidad"]?.AttemptedValue ?? ""
         : "";
 
-    string createFechaNacimiento = ViewData.ModelState.ContainsKey("Autor.FechaNacimiento")
-        ? ViewData.ModelState["Autor.FechaNacimiento"]?.AttemptedValue ?? ""
+    string createFechaNacimiento = ViewData.ModelState.ContainsKey("AutorDto.FechaNacimiento")
+        ? ViewData.ModelState["AutorDto.FechaNacimiento"]?.AttemptedValue ?? ""
         : "";
 
-    bool createEstadoSeleccionado = !ViewData.ModelState.ContainsKey("Autor.Estado")
-        || ViewData.ModelState["Autor.Estado"]?.AttemptedValue == "true"
-        || ViewData.ModelState["Autor.Estado"]?.AttemptedValue == "True"
-        || ViewData.ModelState["Autor.Estado"]?.AttemptedValue == "on";
+    bool createEstadoSeleccionado = !ViewData.ModelState.ContainsKey("AutorDto.Estado")
+        || ViewData.ModelState["AutorDto.Estado"]?.AttemptedValue == "true"
+        || ViewData.ModelState["AutorDto.Estado"]?.AttemptedValue == "True"
+        || ViewData.ModelState["AutorDto.Estado"]?.AttemptedValue == "on";
 }
 
 @section Styles {
@@ -269,44 +269,44 @@
             @Html.AntiForgeryToken()
 
             <input type="text"
-                   name="Autor.Nombres"
+                   name="AutorDto.Nombres"
                    placeholder="Nombres"
                    required
                    value="@createNombres" />
-            @if (ViewData.ModelState.ContainsKey("Autor.Nombres"))
+            @if (ViewData.ModelState.ContainsKey("AutorDto.Nombres"))
             {
-                <span class="text-error">@ViewData.ModelState["Autor.Nombres"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                <span class="text-error">@ViewData.ModelState["AutorDto.Nombres"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
             }
 
             <input type="text"
-                   name="Autor.Apellidos"
+                   name="AutorDto.Apellidos"
                    placeholder="Apellidos"
                    value="@createApellidos" />
-            @if (ViewData.ModelState.ContainsKey("Autor.Apellidos"))
+            @if (ViewData.ModelState.ContainsKey("AutorDto.Apellidos"))
             {
-                <span class="text-error">@ViewData.ModelState["Autor.Apellidos"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                <span class="text-error">@ViewData.ModelState["AutorDto.Apellidos"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
             }
 
             <input type="text"
-                   name="Autor.Nacionalidad"
+                   name="AutorDto.Nacionalidad"
                    placeholder="Nacionalidad"
                    list="paises-lista"
                    autocomplete="off"
                    value="@createNacionalidad" />
-            @if (ViewData.ModelState.ContainsKey("Autor.Nacionalidad"))
+            @if (ViewData.ModelState.ContainsKey("AutorDto.Nacionalidad"))
             {
-                <span class="text-error">@ViewData.ModelState["Autor.Nacionalidad"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                <span class="text-error">@ViewData.ModelState["AutorDto.Nacionalidad"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
             }
 
             <input type="date"
-                   name="Autor.FechaNacimiento"
+                   name="AutorDto.FechaNacimiento"
                    value="@createFechaNacimiento" />
-            @if (ViewData.ModelState.ContainsKey("Autor.FechaNacimiento"))
+            @if (ViewData.ModelState.ContainsKey("AutorDto.FechaNacimiento"))
             {
-                <span class="text-error">@ViewData.ModelState["Autor.FechaNacimiento"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                <span class="text-error">@ViewData.ModelState["AutorDto.FechaNacimiento"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
             }
 
-            <select name="Autor.Estado">
+            <select name="AutorDto.Estado">
                 <option value="true" selected="@(createEstadoSeleccionado ? "selected" : null)">Activo</option>
                 <option value="false" selected="@(!createEstadoSeleccionado ? "selected" : null)">Inactivo</option>
             </select>
