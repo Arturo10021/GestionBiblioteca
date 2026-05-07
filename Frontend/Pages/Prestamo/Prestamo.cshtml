@@ -172,6 +172,7 @@
         <div class="modal-buttons">
             <button type="button" class="btn-ghost-action" onclick="toggleComprobantePreview()">Ver comprobante</button>
             <button type="button" class="btn-nuevo" onclick="descargarComprobantePdf()">Descargar PDF</button>
+            <button type="button" class="btn-secondary" onclick="descargarComprobanteExcel()">Descargar Excel</button>
             <button type="button" class="btn-secondary" onclick="cerrarModal()">Cerrar</button>
         </div>
     </div>
@@ -200,6 +201,7 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let comprobanteActual = null;
 
@@ -410,6 +412,57 @@
 
             const nombreArchivo = `comprobante-prestamo-${comprobanteActual.prestamoId || 'biblioteca'}.pdf`;
             doc.save(nombreArchivo);
+        }
+
+        function descargarComprobanteExcel() {
+            if (!comprobanteActual) {
+                alert('Primero abre un préstamo para generar el comprobante.');
+                return;
+            }
+
+            if (!window.XLSX) {
+                alert('No se pudo cargar el generador de Excel.');
+                return;
+            }
+
+            const fechaDevolucion = comprobanteActual.fechaDevolucion ?? comprobanteActual.fechaEntrega;
+            const ci = comprobanteActual.ci ?? comprobanteActual.clave ?? 'No registrado';
+            const bibliotecario = comprobanteActual.bibliotecario ?? comprobanteActual.usuarioNombre ?? 'No registrado';
+            const totalLibros = comprobanteActual.totalLibros ?? (comprobanteActual.libros || []).length;
+            const fechaEmision = comprobanteActual.fechaEmision ? new Date(comprobanteActual.fechaEmision).toLocaleString() : 'No registrado';
+
+            const resumen = [
+                ['Campo', 'Valor'],
+                ['Préstamo', comprobanteActual.prestamoId ?? ''],
+                ['Nombre de lector', comprobanteActual.nombreLector || 'No registrado'],
+                ['CI', ci],
+                ['Fecha de préstamo', comprobanteActual.fechaPrestamo ? new Date(comprobanteActual.fechaPrestamo).toLocaleString() : 'No registrado'],
+                ['Fecha de devolución', fechaDevolucion ? new Date(fechaDevolucion).toLocaleString() : 'No registrado'],
+                ['Fecha de emisión', fechaEmision],
+                ['Bibliotecario', bibliotecario],
+                ['Total de libros', totalLibros]
+            ];
+
+            const libros = [
+                ['#', 'Título', 'Código']
+            ].concat((comprobanteActual.libros || []).map((libro, indice) => [
+                indice + 1,
+                libro.titulo || 'Sin título',
+                libro.codigo || 'S/C'
+            ]));
+
+            const libroExcel = window.XLSX.utils.book_new();
+            const hojaResumen = window.XLSX.utils.aoa_to_sheet(resumen);
+            const hojaLibros = window.XLSX.utils.aoa_to_sheet(libros);
+
+            hojaResumen['!cols'] = [{ wch: 24 }, { wch: 40 }];
+            hojaLibros['!cols'] = [{ wch: 8 }, { wch: 50 }, { wch: 20 }];
+
+            window.XLSX.utils.book_append_sheet(libroExcel, hojaResumen, 'Resumen');
+            window.XLSX.utils.book_append_sheet(libroExcel, hojaLibros, 'Libros');
+
+            const nombreArchivo = `comprobante-prestamo-${comprobanteActual.prestamoId || 'biblioteca'}.xlsx`;
+            window.XLSX.writeFile(libroExcel, nombreArchivo);
         }
 
         function mostrarDetalles(prestamoId) {
