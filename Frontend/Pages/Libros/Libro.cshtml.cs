@@ -39,7 +39,7 @@ public class LibroModel : PageModel
 
     private void CargarDatos()
     {
-        Libros = _libroServicio.Select();
+        Libros = _libroServicio.Select() ?? new List<LibroDto>();
         LibroTokens = new Dictionary<int, string>();
 
         foreach (var l in Libros)
@@ -146,30 +146,21 @@ public class LibroModel : PageModel
 
         if (!ModelState.IsValid)
         {
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if (EsAjax())
             {
-                var errors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Count > 0)
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList());
-                return new JsonResult(new { success = false, errors = errors });
+                return new JsonResult(new { success = false, errors = ObtenerErroresJson() });
             }
 
             CargarDatos();
             return Page();
         }
 
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        if (EsAjax())
         {
             return new JsonResult(new { success = true });
         }
 
         return RedirectToPage();
-    }
-
-    private void AgregarError(Error error)
-    {
-        var key = error.Code.Split('.').LastOrDefault() ?? string.Empty;
-        ModelState.AddModelError(key, error.Message);
     }
 
     public IActionResult OnPostCrear(
@@ -232,25 +223,50 @@ public class LibroModel : PageModel
 
         if (!ModelState.IsValid)
         {
-            // Si es una solicitud AJAX, devolver JSON
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if (EsAjax())
             {
-                var errors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Count > 0)
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList());
-                return new JsonResult(new { success = false, errors = errors });
+                return new JsonResult(new { success = false, errors = ObtenerErroresJson() });
             }
 
             CargarDatos();
             return Page();
         }
 
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        if (EsAjax())
         {
             return new JsonResult(new { success = true });
         }
 
         return RedirectToPage();
+    }
+
+    private Dictionary<string, List<string>> ObtenerErroresJson()
+    {
+        return ModelState
+            .Where(kvp => kvp.Value?.Errors.Count > 0)
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToList());
+    }
+
+    private void AgregarError(Error error)
+    {
+        var key = error.Code.Split('.').LastOrDefault() ?? string.Empty;
+        key = key.Replace("A�oPublicacion", "AñoPublicacion");
+
+        if (string.Equals(error.Code, "Post", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(error.Code, "Put", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(key))
+        {
+            key = string.Empty;
+        }
+
+        ModelState.AddModelError(key, error.Message);
+    }
+
+    private bool EsAjax()
+    {
+        return Request.Headers["X-Requested-With"] == "XMLHttpRequest";
     }
 
     private int? ObtenerUsuarioSesionId()

@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using MySql.Data.MySqlClient;
 using ServicioPrestamo.Domain.Entities;
 using ServicioPrestamo.Application.Interfaces;
 using ServicioPrestamo.Domain.Common;
@@ -59,7 +60,14 @@ public class EjemplarServicio : IEjemplarServicio
         if (!ExisteLibroActivo(ejemplar.LibroId))
             return Result<Ejemplar>.Failure(EjemplarErrors.LibroInvalido);
 
-        _ejemplarRepositorio.Insert(ejemplar);
+        try
+        {
+            _ejemplarRepositorio.Insert(ejemplar);
+        }
+        catch (MySqlException ex) when (ex.Number == 1062)
+        {
+            return Result<Ejemplar>.Failure(EjemplarErrors.CodigoDuplicado);
+        }
 
         dto.EjemplarId = ejemplar.EjemplarId;
         dto.CodigoInventario = ejemplar.CodigoInventario;

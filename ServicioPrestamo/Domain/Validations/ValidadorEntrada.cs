@@ -167,9 +167,9 @@ public static class ValidadorEntrada
 
         string[] idiomasValidos =
         {
-            "EspaÒol",
-            "InglÈs",
-            "Alem·n",
+            "Espa√±ol",
+            "Ingl√©s",
+            "Alem√°n",
             "Quechua",
             "Aymara",
             "Frances",

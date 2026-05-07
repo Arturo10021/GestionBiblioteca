@@ -177,7 +177,15 @@ public class EjemplarModel : PageModel
             var result = _ejemplarServicio.Create(EjemplarDto);
             if (!result.IsSuccess)
             {
-                AgregarError(result.Error);
+                if (result.Error.Code == "Post")
+                {
+                    ErrorMessage = result.Error.Message;
+                }
+                else
+                {
+                    AgregarError(result.Error, "EjemplarDto");
+                }
+
                 CargarPagina();
                 return Page();
             }
@@ -208,9 +216,14 @@ public class EjemplarModel : PageModel
         Libros = _ejemplarServicio.ObtenerLibrosActivos().ToList();
     }
 
-    private void AgregarError(Error error)
+    private void AgregarError(Error error, string? prefix = null)
     {
         var key = error.Code.Split('.').LastOrDefault() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(prefix) && !string.IsNullOrWhiteSpace(key))
+        {
+            key = $"{prefix}.{key}";
+        }
+
         ModelState.AddModelError(key, error.Message);
     }
 
