@@ -10,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 ConfigurationSingleton.Initialize(builder.Configuration);
 
+// Load local email password (gitignored, each dev creates their own)
+builder.Configuration.AddJsonFile("emailsettings.json", optional: true, reloadOnChange: false);
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 

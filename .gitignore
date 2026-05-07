@@ -184,5 +184,8 @@ Desktop.ini
 *.env.*
 !.env.example
 
+# Email credentials (local only)
+**/emailsettings.json
+
 # Windows symbolic links
 *.symlink
