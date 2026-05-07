@@ -162,9 +162,9 @@ public class EjemplarRepository : IRepository<Ejemplar, int>
         connection.Open();
 
         string query = @"INSERT INTO ejemplar
-            (UsuarioSesionId, LibroId, CodigoInventario, EstadoConservacion, Disponible, DadoDeBaja, MotivoBaja, Ubicacion, Estado)
+            (UsuarioSesionId, LibroId, CodigoInventario, EstadoConservacion, Disponible, DadoDeBaja, MotivoBaja, Ubicacion, Estado, FechaRegistro)
             VALUES
-            (@UsuarioSesionId, @LibroId, @CodigoInventario, @EstadoConservacion, @Disponible, @DadoDeBaja, @MotivoBaja, @Ubicacion, @Estado);";
+            (@UsuarioSesionId, @LibroId, @CodigoInventario, @EstadoConservacion, @Disponible, @DadoDeBaja, @MotivoBaja, @Ubicacion, @Estado, @FechaRegistro);";
 
         using var command = new MySqlCommand(query, connection);
         command.Parameters.AddWithValue("@UsuarioSesionId", e.UsuarioSesionId ?? (object)DBNull.Value);
@@ -176,8 +176,10 @@ public class EjemplarRepository : IRepository<Ejemplar, int>
         command.Parameters.AddWithValue("@MotivoBaja", e.MotivoBaja ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("@Ubicacion", e.Ubicacion ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("@Estado", e.Estado);
+        command.Parameters.AddWithValue("@FechaRegistro", e.FechaRegistro);
 
         command.ExecuteNonQuery();
+        e.EjemplarId = Convert.ToInt32(command.LastInsertedId);
     }
 
     public void Update(Ejemplar e)
@@ -272,5 +274,3 @@ public class EjemplarRepository : IRepository<Ejemplar, int>
         return e;
     }
 }
-
-
