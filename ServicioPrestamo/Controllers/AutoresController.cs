@@ -47,9 +47,9 @@ public class AutoresController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public ActionResult Delete(int id, [FromQuery] int? sid)
     {
-        var result = _autorServicio.Delete(id);
+        var result = _autorServicio.Delete(id, sid);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
     }
 }

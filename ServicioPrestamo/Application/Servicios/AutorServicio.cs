@@ -72,6 +72,7 @@ public class AutorServicio : IAutorServicio
             return Result<Autor>.Failure(AutorErrors.NombresObligatorios);
         }
 
+        autorExistente.UsuarioSesionId = Autor.UsuarioSesionId;
         autorExistente.Nombres = Autor.Nombres.ToDisplayName();
         autorExistente.Apellidos = Autor.Apellidos.ToDisplayName();
         autorExistente.Nacionalidad = Autor.Nacionalidad;
@@ -85,12 +86,13 @@ public class AutorServicio : IAutorServicio
         return Result<Autor>.Success(Autor);
     }
 
-    public Result Delete(int autorId)
+    public Result Delete(int autorId, int? usuarioSesionId)
     {
         var autor = _autorRepositorio.GetById(autorId);
         if (autor == null)
             return Result.Failure(AutorErrors.AutorNoEncontrado);
-            
+
+        autor.UsuarioSesionId = usuarioSesionId;
         _autorRepositorio.Delete(autor);
         return Result.Success();
     }

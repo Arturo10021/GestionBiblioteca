@@ -70,8 +70,8 @@ public class AutorModel : PageModel
         if (!_routeTokenService.TryObtenerId(token, out var id))
             return NotFound();
 
-        var result = _autorServicio.Delete(id);
-        
+        var result = _autorServicio.Delete(id, ObtenerUsuarioSesionId());
+
         if (result.IsFailure)
         {
             // Opcional: manejar error de eliminación
@@ -90,6 +90,7 @@ public class AutorModel : PageModel
         ModalActivo = "crear";
         AutorDto.Nombres = AutorDto.Nombres.ToDisplayName();
         AutorDto.Apellidos = AutorDto.Apellidos.ToDisplayName();
+        AutorDto.UsuarioSesionId = ObtenerUsuarioSesionId();
 
         var result = _autorServicio.Create(AutorDto);
 
@@ -135,7 +136,8 @@ public class AutorModel : PageModel
             Apellidos = Apellidos,
             Nacionalidad = Nacionalidad,
             FechaNacimiento = FechaNacimiento,
-            Estado = Estado ?? false
+            Estado = Estado ?? false,
+            UsuarioSesionId = ObtenerUsuarioSesionId()
         };
 
         var result = _autorServicio.Update(autorDto);
@@ -180,5 +182,17 @@ public class AutorModel : PageModel
 
         return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private int? ObtenerUsuarioSesionId()
+    {
+        var usuarioSesion = HttpContext.Session.GetString(SessionKeys.UsuarioId);
+
+        if (int.TryParse(usuarioSesion, out var usuarioId))
+        {
+            return usuarioId;
+        }
+
+        return null;
     }
 }
