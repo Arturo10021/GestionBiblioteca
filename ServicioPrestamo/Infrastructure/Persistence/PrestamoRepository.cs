@@ -21,6 +21,7 @@ public class PrestamoRepository : IRepository<Prestamo, int>
 
         string query = @"SELECT p.PrestamoId, p.LectorId, p.FechaPrestamo, p.FechaDevolucionEsperada, p.FechaDevolucionReal, p.ObservacionesSalida, p.ObservacionesEntrada, p.Estado, p.UsuarioSesionId, p.FechaRegistro, p.UltimaActualizacion
                          FROM prestamo p
+                         WHERE p.Estado = 1
                          ORDER BY p.FechaPrestamo DESC;";
 
         using MySqlCommand command = new MySqlCommand(query, connection);
@@ -183,6 +184,79 @@ public class PrestamoRepository : IRepository<Prestamo, int>
             }
 
             transaction.Commit();
+        }
+        catch
+        {
+            try { transaction.Rollback(); } catch { }
+            throw;
+        }
+    }
+
+    public int CrearPrestamoTransaccional(Prestamo prestamo, IEnumerable<Detalle> detalles, int? usuarioSesionId)
+    {
+        using var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            // 1. Insertar cabecera de préstamo
+            string queryPrestamo = @"INSERT INTO prestamo
+                (LectorId, FechaPrestamo, FechaDevolucionEsperada, FechaDevolucionReal, ObservacionesSalida, ObservacionesEntrada, Estado, UsuarioSesionId, FechaRegistro)
+                VALUES
+                (@LectorId, @FechaPrestamo, @FechaDevolucionEsperada, @FechaDevolucionReal, @ObservacionesSalida, @ObservacionesEntrada, @Estado, @UsuarioSesionId, NOW());
+                SELECT LAST_INSERT_ID();";
+
+            using var cmdPrestamo = new MySqlCommand(queryPrestamo, connection, transaction);
+            cmdPrestamo.Parameters.AddWithValue("@LectorId", prestamo.LectorId);
+            cmdPrestamo.Parameters.AddWithValue("@FechaPrestamo", prestamo.FechaPrestamo);
+            cmdPrestamo.Parameters.AddWithValue("@FechaDevolucionEsperada", prestamo.FechaDevolucionEsperada);
+            cmdPrestamo.Parameters.AddWithValue("@FechaDevolucionReal", prestamo.FechaDevolucionReal ?? (object)DBNull.Value);
+            cmdPrestamo.Parameters.AddWithValue("@ObservacionesSalida", prestamo.ObservacionesSalida ?? (object)DBNull.Value);
+            cmdPrestamo.Parameters.AddWithValue("@ObservacionesEntrada", prestamo.ObservacionesEntrada ?? (object)DBNull.Value);
+            cmdPrestamo.Parameters.AddWithValue("@Estado", prestamo.Estado);
+            cmdPrestamo.Parameters.AddWithValue("@UsuarioSesionId", prestamo.UsuarioSesionId ?? (object)DBNull.Value);
+
+            var result = cmdPrestamo.ExecuteScalar();
+            int prestamoId = result != null ? Convert.ToInt32(result) : 0;
+            prestamo.PrestamoId = prestamoId;
+
+            if (prestamoId <= 0)
+                throw new InvalidOperationException("No se pudo insertar el préstamo.");
+
+            // 2. Insertar cada detalle
+            foreach (var detalle in detalles)
+            {
+                detalle.PrestamoId = prestamoId;
+
+                string queryDetalle = @"INSERT INTO detalle
+                    (PrestamoId, EjemplarId, EstadoDetalle, FechaDevolucionReal, ObservacionesSalida, ObservacionesEntrada, UsuarioSesionId, FechaRegistro)
+                    VALUES
+                    (@PrestamoId, @EjemplarId, @EstadoDetalle, @FechaDevolucionReal, @ObservacionesSalida, @ObservacionesEntrada, @UsuarioSesionId, NOW());";
+
+                using var cmdDetalle = new MySqlCommand(queryDetalle, connection, transaction);
+                cmdDetalle.Parameters.AddWithValue("@PrestamoId", detalle.PrestamoId);
+                cmdDetalle.Parameters.AddWithValue("@EjemplarId", detalle.EjemplarId);
+                cmdDetalle.Parameters.AddWithValue("@EstadoDetalle", detalle.EstadoDetalle);
+                cmdDetalle.Parameters.AddWithValue("@FechaDevolucionReal", detalle.FechaDevolucionReal ?? (object)DBNull.Value);
+                cmdDetalle.Parameters.AddWithValue("@ObservacionesSalida", detalle.ObservacionesSalida ?? (object)DBNull.Value);
+                cmdDetalle.Parameters.AddWithValue("@ObservacionesEntrada", detalle.ObservacionesEntrada ?? (object)DBNull.Value);
+                cmdDetalle.Parameters.AddWithValue("@UsuarioSesionId", detalle.UsuarioSesionId ?? (object)DBNull.Value);
+                cmdDetalle.ExecuteNonQuery();
+            }
+
+            // 3. Actualizar disponibilidad de ejemplares
+            foreach (var detalle in detalles)
+            {
+                string queryEjemplar = @"UPDATE ejemplar SET Disponible = 0, UsuarioSesionId = @UsuarioSesionId WHERE EjemplarId = @EjemplarId;";
+
+                using var cmdEjemplar = new MySqlCommand(queryEjemplar, connection, transaction);
+                cmdEjemplar.Parameters.AddWithValue("@EjemplarId", detalle.EjemplarId);
+                cmdEjemplar.Parameters.AddWithValue("@UsuarioSesionId", usuarioSesionId ?? (object)DBNull.Value);
+                cmdEjemplar.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+            return prestamoId;
         }
         catch
         {
