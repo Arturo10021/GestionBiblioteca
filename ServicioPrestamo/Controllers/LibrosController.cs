@@ -4,6 +4,8 @@ using ServicioPrestamo.Domain.Entities;
 
 namespace ServicioPrestamo.Controllers;
 
+public sealed record CrearLibroRequest(Libro Libro, string? NombreAutorNuevo);
+
 [ApiController]
 [Route("api/[controller]")]
 public class LibrosController : ControllerBase
@@ -34,10 +36,22 @@ public class LibrosController : ControllerBase
         return Ok(_libroServicio.ObtenerTitulosLibros());
     }
 
-    [HttpPost]
-    public ActionResult Create(Libro dto)
+    [HttpGet("autores-nombres")]
+    public ActionResult<Dictionary<int, string>> GetAutoresNombres()
     {
-        var result = _libroServicio.Create(dto, null);
+        return Ok(_libroServicio.ObtenerNombresAutores());
+    }
+
+    [HttpGet("autores-activos")]
+    public ActionResult<IEnumerable<Autor>> GetAutoresActivos()
+    {
+        return Ok(_libroServicio.ObtenerAutoresActivos());
+    }
+
+    [HttpPost]
+    public ActionResult Create([FromBody] CrearLibroRequest request)
+    {
+        var result = _libroServicio.Create(request.Libro, request.NombreAutorNuevo);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : Ok();
     }
 

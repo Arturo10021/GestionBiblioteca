@@ -11,13 +11,13 @@ public class LibroAdapter : ILibroServicio
     private readonly HttpClient _http;
     public LibroAdapter(IHttpClientFactory f) => _http = f.CreateClient("ServicioPrestamo");
 
-    public IEnumerable<LibroDto> Select() => CallGet<List<LibroDto>>("api/libros");
+    public IEnumerable<LibroDto> Select() => CallGet<List<LibroDto>>("api/libros") ?? new();
     public LibroDto? GetById(int id) => CallGet<LibroDto>($"api/libros/{id}");
-    public Result Create(LibroDto dto, string? n) => CallPost("api/libros", dto);
+    public Result Create(LibroDto dto, string? n) => CallPost("api/libros", new { libro = dto, nombreAutorNuevo = n });
     public Result Update(LibroDto dto) => CallPut($"api/libros/{dto.LibroId}", dto);
     public Result Delete(int id, int? uid) => CallDelete($"api/libros/{id}");
-    public Dictionary<int, string> ObtenerNombresAutores() => CallGet<Dictionary<int, string>>("api/libros/titulos") ?? new();
-    public IEnumerable<AutorDto> ObtenerAutoresActivos() => CallGet<List<AutorDto>>("api/autores") ?? new();
+    public Dictionary<int, string> ObtenerNombresAutores() => CallGet<Dictionary<int, string>>("api/libros/autores-nombres") ?? new();
+    public IEnumerable<AutorDto> ObtenerAutoresActivos() => CallGet<List<AutorDto>>("api/libros/autores-activos") ?? new();
     public bool ExisteAutorActivo(int id) => true;
     public int InsertarAutorYObtenerID(string n, int? uid) => 0;
 
