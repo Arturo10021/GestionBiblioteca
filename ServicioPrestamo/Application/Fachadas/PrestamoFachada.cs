@@ -11,15 +11,11 @@ public class PrestamoFachada : IPrestamoFachada
 {
     private readonly IPrestamoServicio _prestamoServicio;
     private readonly IEjemplarServicio _ejemplarServicio;
-    private readonly IDetalleServicio _detalleServicio;
-    private readonly IEjemplarDisponibilidadFachada _disponibilidadFachada;
 
-    public PrestamoFachada(IPrestamoServicio prestamoServicio, IEjemplarServicio ejemplarServicio, IDetalleServicio detalleServicio, IEjemplarDisponibilidadFachada disponibilidadFachada)
+    public PrestamoFachada(IPrestamoServicio prestamoServicio, IEjemplarServicio ejemplarServicio)
     {
         _prestamoServicio = prestamoServicio;
         _ejemplarServicio = ejemplarServicio;
-        _detalleServicio = detalleServicio;
-        _disponibilidadFachada = disponibilidadFachada;
     }
 
     public IEnumerable<KeyValuePair<int, string>> BuscarEjemplaresActivos(string q)
@@ -73,16 +69,11 @@ public class PrestamoFachada : IPrestamoFachada
                 UsuarioSesionId = usuarioSesionId
             };
 
-            _prestamoServicio.InsertAndReturnId(prestamo);
-            if (prestamo.PrestamoId <= 0)
-                return Result<int>.Failure(new Error("Prestamo.Error", "No se pudo obtener el ID del préstamo."));
-
             var detalles = new List<Detalle>();
             foreach (var item in detallesEntrada)
             {
                 detalles.Add(new Detalle
                 {
-                    PrestamoId = prestamo.PrestamoId,
                     EjemplarId = item.EjemplarId,
                     EstadoDetalle = 1,
                     ObservacionesSalida = item.ObservacionesSalida,
@@ -91,18 +82,11 @@ public class PrestamoFachada : IPrestamoFachada
                 });
             }
 
-            var resultadoDetalles = _detalleServicio.CrearMultiples(detalles);
-            if (resultadoDetalles.IsFailure)
-                return Result<int>.Failure(resultadoDetalles.Error);
+            var prestamoId = _prestamoServicio.CrearPrestamoTransaccional(prestamo, detalles, usuarioSesionId);
+            if (prestamoId <= 0)
+                return Result<int>.Failure(new Error("Prestamo.Error", "No se pudo crear el préstamo."));
 
-            foreach (var ejemplarId in ejemplares)
-            {
-                var result = _disponibilidadFachada.CambiarDisponibilidad(ejemplarId, false, usuarioSesionId);
-                if (result.IsFailure)
-                    return Result<int>.Failure(result.Error);
-            }
-
-            return Result<int>.Success(prestamo.PrestamoId);
+            return Result<int>.Success(prestamoId);
         }
         catch (Exception ex)
         {

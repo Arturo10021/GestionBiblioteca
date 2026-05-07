@@ -14,4 +14,5 @@ public interface IPrestamoServicio
     Result ValidarPrestamo(Prestamo prestamo);
     int CountPrestamosActivos(int lectorId);
     int InsertAndReturnId(Prestamo prestamo);
+    int CrearPrestamoTransaccional(Prestamo prestamo, IEnumerable<Detalle> detalles, int? usuarioSesionId);
 }

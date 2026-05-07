@@ -77,6 +77,12 @@ public class PrestamoServicio : IPrestamoServicio
 
     public int InsertAndReturnId(Prestamo prestamo)
     {
-        return _prestamoRepositorio.Insert(prestamo);
+        _prestamoRepositorio.Insert(prestamo);
+        return prestamo.PrestamoId;
+    }
+
+    public int CrearPrestamoTransaccional(Prestamo prestamo, IEnumerable<Detalle> detalles, int? usuarioSesionId)
+    {
+        return _prestamoRepositorio.CrearPrestamoTransaccional(prestamo, detalles, usuarioSesionId);
     }
 }

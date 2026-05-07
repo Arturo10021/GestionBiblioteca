@@ -45,9 +45,7 @@ public class AnulacionFachada : IAnulacionFachada
             if (prestamo.FechaDevolucionReal != null)
                 return Result.Failure(new Error("Anulacion.Error", "No se puede anular un préstamo que ya registra devolución."));
 
-            var detalles = _detalleRepositorio.GetAll()
-                .Where(d => d.PrestamoId == prestamoId)
-                .ToList();
+            var detalles = _detalleRepositorio.GetByPrestamoId(prestamoId).ToList();
 
             if (!detalles.Any())
                 return Result.Failure(new Error("Anulacion.Error", "El préstamo no tiene detalles asociados."));
