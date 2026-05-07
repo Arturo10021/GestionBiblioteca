@@ -6,7 +6,7 @@ namespace ServicioPrestamo.Application.Interfaces;
 
 public interface IPrestamoServicio
 {
-    IEnumerable<Prestamo> Select();
+    IEnumerable<Prestamo> Select(bool incluirInactivos = false);
     Result Create(Prestamo prestamo);
     Result Update(Prestamo prestamo);
     Result Delete(Prestamo prestamo);

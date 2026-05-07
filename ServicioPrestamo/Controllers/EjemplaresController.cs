@@ -16,9 +16,9 @@ public class EjemplaresController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Ejemplar>> GetAll()
+    public ActionResult<IEnumerable<Ejemplar>> GetAll([FromQuery] bool todos = false)
     {
-        return Ok(_ejemplarServicio.Select());
+        return Ok(_ejemplarServicio.Select(todos));
     }
 
     [HttpGet("{id}")]

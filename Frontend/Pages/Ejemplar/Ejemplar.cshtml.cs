@@ -207,7 +207,7 @@ public class EjemplarModel : PageModel
 
     private void CargarPagina()
     {
-        Ejemplares = _ejemplarServicio.Select().ToList();
+        Ejemplares = _ejemplarServicio.Select(todos: EsAdmin()).ToList();
         foreach (var EjemplarDto in Ejemplares)
         {
             EjemplarDto.RouteToken = _routeTokenService.CrearToken(EjemplarDto.EjemplarId);
@@ -245,5 +245,11 @@ public class EjemplarModel : PageModel
 
         return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool EsAdmin()
+    {
+        var rol = HttpContext.Session.GetString(SessionKeys.Rol);
+        return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase);
     }
 }

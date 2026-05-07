@@ -14,9 +14,10 @@ public class AutorAdapter : IAutorServicio
         _http = factory.CreateClient("ServicioPrestamo");
     }
 
-    public IEnumerable<AutorDto> Select()
+    public IEnumerable<AutorDto> Select(bool todos = false)
     {
-        var response = _http.GetAsync("api/autores").Result;
+        var url = todos ? "api/autores?todos=true" : "api/autores";
+        var response = _http.GetAsync(url).Result;
         response.EnsureSuccessStatusCode();
         return response.Content.ReadFromJsonAsync<List<AutorDto>>().Result ?? new();
     }

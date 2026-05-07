@@ -18,9 +18,9 @@ public class AutorServicio : IAutorServicio
         _autorRepositorio = autorRepositorio;
     }
 
-    public IEnumerable<Autor> Select() 
+    public IEnumerable<Autor> Select(bool incluirInactivos = false)
     {
-        var autores = _autorRepositorio.GetAll();
+        var autores = _autorRepositorio.GetAll(!incluirInactivos);
         return autores.Select(a => new Autor
         {
             AutorId = a.AutorId,

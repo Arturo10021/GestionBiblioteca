@@ -16,9 +16,9 @@ public class AutoresController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Autor>> GetAll()
+    public ActionResult<IEnumerable<Autor>> GetAll([FromQuery] bool todos = false)
     {
-        return Ok(_autorServicio.Select());
+        return Ok(_autorServicio.Select(todos));
     }
 
     [HttpGet("{id}")]

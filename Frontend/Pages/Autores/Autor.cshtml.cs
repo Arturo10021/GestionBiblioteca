@@ -44,7 +44,7 @@ public class AutorModel : PageModel
 
     private void CargarAutores()
     {
-        var autores = _autorServicio.Select().ToList();
+        var autores = _autorServicio.Select(todos: EsAdmin()).ToList();
         
         foreach (var AutorDto in autores)
         {
@@ -182,6 +182,12 @@ public class AutorModel : PageModel
 
         return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool EsAdmin()
+    {
+        var rol = HttpContext.Session.GetString(SessionKeys.Rol);
+        return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase);
     }
 
     private int? ObtenerUsuarioSesionId()

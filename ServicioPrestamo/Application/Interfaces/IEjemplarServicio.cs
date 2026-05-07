@@ -6,7 +6,7 @@ namespace ServicioPrestamo.Application.Interfaces;
 
 public interface IEjemplarServicio
 {
-    IEnumerable<Ejemplar> Select();
+    IEnumerable<Ejemplar> Select(bool incluirInactivos = false);
     Result<Ejemplar> Create(Ejemplar dto);
     Result<Ejemplar> Update(Ejemplar dto);
     Result Delete(Ejemplar dto);

@@ -12,7 +12,7 @@ public class LibroAdapter : ILibroServicio
     private readonly HttpClient _http;
     public LibroAdapter(IHttpClientFactory f) => _http = f.CreateClient("ServicioPrestamo");
 
-    public IEnumerable<LibroDto> Select() => CallGet<List<LibroDto>>("api/libros") ?? new();
+    public IEnumerable<LibroDto> Select(bool todos = false) => CallGet<List<LibroDto>>(todos ? "api/libros?todos=true" : "api/libros") ?? new();
     public LibroDto? GetById(int id) => CallGet<LibroDto>($"api/libros/{id}");
     public Result Create(LibroDto dto, string? n) => CallPost("api/libros", new { libro = dto, nombreAutorNuevo = n });
     public Result Update(LibroDto dto) => CallPut($"api/libros/{dto.LibroId}", dto);

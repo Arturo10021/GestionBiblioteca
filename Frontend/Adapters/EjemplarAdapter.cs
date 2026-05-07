@@ -12,7 +12,7 @@ public class EjemplarAdapter : IEjemplarServicio
     private readonly HttpClient _http;
     public EjemplarAdapter(IHttpClientFactory f) => _http = f.CreateClient("ServicioPrestamo");
 
-    public IEnumerable<EjemplarDto> Select() => CallGet<List<EjemplarDto>>("api/ejemplares") ?? new();
+    public IEnumerable<EjemplarDto> Select(bool todos = false) => CallGet<List<EjemplarDto>>(todos ? "api/ejemplares?todos=true" : "api/ejemplares") ?? new();
     public EjemplarDto? GetById(int id) => CallGet<EjemplarDto>($"api/ejemplares/{id}");
     public Result<EjemplarDto> Create(EjemplarDto d) => CallPostR<EjemplarDto>("api/ejemplares", d);
     public Result<EjemplarDto> Update(EjemplarDto d) => CallPutR<EjemplarDto>($"api/ejemplares/{d.EjemplarId}", d);

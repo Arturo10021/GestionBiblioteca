@@ -6,7 +6,7 @@ namespace Frontend.Adapters;
 
 public interface IPrestamoServicio
 {
-    IEnumerable<PrestamoDto> Select();
+    IEnumerable<PrestamoDto> Select(bool todos = false);
     Result<PrestamoDto> Create(PrestamoDto dto);
     Result<PrestamoDto> Update(PrestamoDto dto);
     Result Delete(PrestamoDto dto);

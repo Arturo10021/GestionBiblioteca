@@ -18,9 +18,9 @@ public class LibrosController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Libro>> GetAll()
+    public ActionResult<IEnumerable<Libro>> GetAll([FromQuery] bool todos = false)
     {
-        return Ok(_libroServicio.Select());
+        return Ok(_libroServicio.Select(todos));
     }
 
     [HttpGet("{id}")]

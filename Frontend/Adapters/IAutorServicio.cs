@@ -5,7 +5,7 @@ namespace Frontend.Adapters;
 
 public interface IAutorServicio
 {
-    IEnumerable<AutorDto> Select();
+    IEnumerable<AutorDto> Select(bool todos = false);
     Result<AutorDto> Create(AutorDto dto);
     Result<AutorDto> Update(AutorDto dto);
     Result Delete(int id, int? usuarioSesionId);

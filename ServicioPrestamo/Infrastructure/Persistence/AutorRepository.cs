@@ -96,6 +96,11 @@ public class AutorRepository : IRepository<Autor, int>
 
     public IEnumerable<Autor> GetAll()
     {
+        return GetAll(activos: true);
+    }
+
+    public IEnumerable<Autor> GetAll(bool activos)
+    {
         var autores = new List<Autor>();
 
         using var connection = ConfigurationSingleton.Instancia.GetConnection();
@@ -112,7 +117,7 @@ public class AutorRepository : IRepository<Autor, int>
                              FechaRegistro,
                              UltimaActualizacion
                          FROM autor
-                         WHERE Estado = 1
+                         " + (activos ? "WHERE Estado = 1" : "") + @"
                          ORDER BY Nombres ASC;";
 
         using var command = connection.CreateCommand();

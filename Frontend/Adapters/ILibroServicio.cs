@@ -6,7 +6,7 @@ namespace Frontend.Adapters;
 
 public interface ILibroServicio
 {
-    IEnumerable<LibroDto> Select();
+    IEnumerable<LibroDto> Select(bool todos = false);
     LibroDto? GetById(int id);
     Result Create(LibroDto dto, string? nombreAutorNuevo);
     Result Update(LibroDto dto);
