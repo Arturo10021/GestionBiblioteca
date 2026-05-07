@@ -18,9 +18,9 @@ public class LibrosController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Libro>> GetAll()
+    public ActionResult<IEnumerable<Libro>> GetAll([FromQuery] bool todos = false)
     {
-        return Ok(_libroServicio.Select());
+        return Ok(_libroServicio.Select(todos));
     }
 
     [HttpGet("{id}")]
@@ -75,5 +75,11 @@ public class LibrosController : ControllerBase
     {
         var result = _libroServicio.Delete(id, null);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
+    }
+
+    [HttpGet("{id}/existe")]
+    public ActionResult<bool> Existe(int id)
+    {
+        return Ok(_libroServicio.ExisteAutorActivo(id));
     }
 }

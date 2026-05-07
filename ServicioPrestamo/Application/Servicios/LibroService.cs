@@ -16,9 +16,9 @@ public class LibroServicio : ILibroServicio
         _libroRepositorio = libroRepositorio;
     }
 
-    public IEnumerable<Libro> Select()
+    public IEnumerable<Libro> Select(bool incluirInactivos = false)
     {
-        var libros = _libroRepositorio.GetAll();
+        var libros = _libroRepositorio.GetAll(!incluirInactivos);
         var autores = _libroRepositorio.ObtenerNombresAutores().ToDictionary(a => a.AutorId, a => $"{a.Nombres} {(a.Apellidos ?? "")}".Trim());
 
         return libros.Select(l => new Libro

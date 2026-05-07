@@ -12,14 +12,23 @@ public class LibroAdapter : ILibroServicio
     private readonly HttpClient _http;
     public LibroAdapter(IHttpClientFactory f) => _http = f.CreateClient("ServicioPrestamo");
 
-    public IEnumerable<LibroDto> Select() => CallGet<List<LibroDto>>("api/libros") ?? new();
+    public IEnumerable<LibroDto> Select(bool todos = false) => CallGet<List<LibroDto>>(todos ? "api/libros?todos=true" : "api/libros") ?? new();
     public LibroDto? GetById(int id) => CallGet<LibroDto>($"api/libros/{id}");
     public Result Create(LibroDto dto, string? n) => CallPost("api/libros", new { libro = dto, nombreAutorNuevo = n });
     public Result Update(LibroDto dto) => CallPut($"api/libros/{dto.LibroId}", dto);
     public Result Delete(int id, int? uid) => CallDelete($"api/libros/{id}");
     public Dictionary<int, string> ObtenerNombresAutores() => CallGet<Dictionary<int, string>>("api/libros/autores-nombres") ?? new();
     public IEnumerable<AutorDto> ObtenerAutoresActivos() => CallGet<List<AutorDto>>("api/libros/autores-activos") ?? new();
-    public bool ExisteAutorActivo(int id) => true;
+    public bool ExisteAutorActivo(int id)
+    {
+        try
+        {
+            var r = _http.GetAsync($"api/autores/{id}/existe").Result;
+            if (!r.IsSuccessStatusCode) return false;
+            return r.Content.ReadFromJsonAsync<bool>().Result;
+        }
+        catch { return false; }
+    }
     public int InsertarAutorYObtenerID(string n, int? uid) => 0;
 
     private T? CallGet<T>(string url) where T : class { try { var r = _http.GetAsync(url).Result; r.EnsureSuccessStatusCode(); return r.Content.ReadFromJsonAsync<T>().Result; } catch { return null; } }

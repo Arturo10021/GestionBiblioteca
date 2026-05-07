@@ -85,11 +85,12 @@ public class PrestamoServicioAdapter : IPrestamoServicio
         _http = factory.CreateClient("ServicioPrestamo");
     }
 
-    public IEnumerable<PrestamoDto> Select()
+    public IEnumerable<PrestamoDto> Select(bool todos = false)
     {
         try
         {
-            var response = _http.GetAsync("api/prestamos").Result;
+            var url = todos ? "api/prestamos?todos=true" : "api/prestamos";
+            var response = _http.GetAsync(url).Result;
             if (!response.IsSuccessStatusCode) return new List<PrestamoDto>();
             return response.Content.ReadFromJsonAsync<List<PrestamoDto>>().Result ?? new List<PrestamoDto>();
         }

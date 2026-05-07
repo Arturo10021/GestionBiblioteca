@@ -6,7 +6,7 @@ namespace ServicioPrestamo.Application.Interfaces;
 
 public interface IAutorServicio
 {
-    IEnumerable<Autor> Select();
+    IEnumerable<Autor> Select(bool incluirInactivos = false);
     Result<Autor> Create(Autor Autor);
     Result<Autor> Update(Autor Autor);
     Result Delete(int autorId, int? usuarioSesionId);

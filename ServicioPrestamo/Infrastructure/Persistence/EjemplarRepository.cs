@@ -109,6 +109,11 @@ public class EjemplarRepository : IRepository<Ejemplar, int>
 
     public IEnumerable<Ejemplar> GetAll()
     {
+        return GetAll(activos: true);
+    }
+
+    public IEnumerable<Ejemplar> GetAll(bool activos)
+    {
         var lista = new List<Ejemplar>();
 
         using var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection();
@@ -128,6 +133,7 @@ public class EjemplarRepository : IRepository<Ejemplar, int>
                         e.Estado
                     FROM ejemplar e
                     INNER JOIN libro l ON e.LibroId = l.LibroId
+                    " + (activos ? "WHERE e.Estado = 1" : "") + @"
                     ORDER BY l.Titulo ASC;";
 
         using var command = new MySqlCommand(query, connection);

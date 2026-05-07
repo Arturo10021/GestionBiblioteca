@@ -24,9 +24,9 @@ public class PrestamosController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Prestamo>> GetAll()
+    public ActionResult<IEnumerable<Prestamo>> GetAll([FromQuery] bool todos = false)
     {
-        var prestamos = _prestamoServicio.Select();
+        var prestamos = _prestamoServicio.Select(todos);
         return Ok(prestamos);
     }
 

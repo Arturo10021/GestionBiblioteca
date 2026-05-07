@@ -14,6 +14,11 @@ public class PrestamoRepository : IRepository<Prestamo, int>
 
     public IEnumerable<Prestamo> GetAll()
     {
+        return GetAll(activos: true);
+    }
+
+    public IEnumerable<Prestamo> GetAll(bool activos)
+    {
         var prestamos = new List<Prestamo>();
 
         using var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection();
@@ -21,7 +26,7 @@ public class PrestamoRepository : IRepository<Prestamo, int>
 
         string query = @"SELECT p.PrestamoId, p.LectorId, p.FechaPrestamo, p.FechaDevolucionEsperada, p.FechaDevolucionReal, p.ObservacionesSalida, p.ObservacionesEntrada, p.Estado, p.UsuarioSesionId, p.FechaRegistro, p.UltimaActualizacion
                          FROM prestamo p
-                         WHERE p.Estado = 1
+                         " + (activos ? "WHERE p.Estado = 1" : "") + @"
                          ORDER BY p.FechaPrestamo DESC;";
 
         using MySqlCommand command = new MySqlCommand(query, connection);

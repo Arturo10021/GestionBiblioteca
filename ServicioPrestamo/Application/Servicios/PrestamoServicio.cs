@@ -18,9 +18,9 @@ public class PrestamoServicio : IPrestamoServicio
         _prestamoRepositorio = prestamoRepositorio;
     }
 
-    public IEnumerable<Prestamo> Select()
+    public IEnumerable<Prestamo> Select(bool incluirInactivos = false)
     {
-        return _prestamoRepositorio.GetAll();
+        return _prestamoRepositorio.GetAll(!incluirInactivos);
     }
 
     public Result Create(Prestamo prestamo)

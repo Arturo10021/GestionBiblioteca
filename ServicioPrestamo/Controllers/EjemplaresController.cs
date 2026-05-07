@@ -16,9 +16,9 @@ public class EjemplaresController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Ejemplar>> GetAll()
+    public ActionResult<IEnumerable<Ejemplar>> GetAll([FromQuery] bool todos = false)
     {
-        return Ok(_ejemplarServicio.Select());
+        return Ok(_ejemplarServicio.Select(todos));
     }
 
     [HttpGet("{id}")]
@@ -59,5 +59,11 @@ public class EjemplaresController : ControllerBase
         if (ejemplar is null) return NotFound();
         var result = _ejemplarServicio.Delete(ejemplar);
         return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
+    }
+
+    [HttpGet("libro/{libroId}/existe")]
+    public ActionResult<bool> ExisteLibro(int libroId)
+    {
+        return Ok(_ejemplarServicio.ExisteLibroActivo(libroId));
     }
 }

@@ -18,9 +18,9 @@ public class EjemplarServicio : IEjemplarServicio
         _ejemplarRepositorio = ejemplarRepositorio;
     }
 
-    public IEnumerable<Ejemplar> Select()
+    public IEnumerable<Ejemplar> Select(bool incluirInactivos = false)
     {
-        var ejemplares = _ejemplarRepositorio.GetAll();
+        var ejemplares = _ejemplarRepositorio.GetAll(!incluirInactivos);
         return ejemplares.Select(e => new Ejemplar
         {
             EjemplarId = e.EjemplarId,

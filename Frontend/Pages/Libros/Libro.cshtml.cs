@@ -39,7 +39,7 @@ public class LibroModel : PageModel
 
     private void CargarDatos()
     {
-        Libros = _libroServicio.Select() ?? new List<LibroDto>();
+        Libros = _libroServicio.Select(todos: EsAdmin()) ?? new List<LibroDto>();
         LibroTokens = new Dictionary<int, string>();
 
         foreach (var l in Libros)
@@ -286,5 +286,11 @@ public class LibroModel : PageModel
 
         return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool EsAdmin()
+    {
+        var rol = HttpContext.Session.GetString(SessionKeys.Rol);
+        return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -6,7 +6,7 @@ namespace ServicioPrestamo.Application.Interfaces;
 
 public interface ILibroServicio
 {
-    IEnumerable<Libro> Select();
+    IEnumerable<Libro> Select(bool incluirInactivos = false);
     Libro? GetById(int id);
 
     Result Create(Libro Libro, string? nombreAutorNuevo);

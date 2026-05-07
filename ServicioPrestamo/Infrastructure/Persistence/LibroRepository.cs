@@ -28,9 +28,10 @@ public class LibroRepository : IRepository<Libro, int>
                Descripcion,
                Estado
         FROM libro
+        WHERE Estado = 1
         ORDER BY Titulo ASC";
 
-    private const string QueryAutores = "SELECT AutorId, Nombres, Apellidos FROM autor";
+    private const string QueryAutores = "SELECT AutorId, Nombres, Apellidos FROM autor WHERE Estado = 1";
 
     private const string QueryAutoresActivos = @"
         SELECT AutorId, Nombres, Apellidos, Nacionalidad
@@ -134,12 +135,18 @@ public class LibroRepository : IRepository<Libro, int>
 
     public IEnumerable<Libro> GetAll()
     {
+        return GetAll(activos: true);
+    }
+
+    public IEnumerable<Libro> GetAll(bool activos)
+    {
         var libros = new List<Libro>();
 
         using var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection();
         connection.Open();
 
-        using var command = new MySqlCommand(QueryLibros, connection);
+        var query = activos ? QueryLibros : QueryLibros.Replace("WHERE Estado = 1", "");
+        using var command = new MySqlCommand(query, connection);
         using var reader = command.ExecuteReader();
 
         while (reader.Read())
@@ -361,7 +368,7 @@ public class LibroRepository : IRepository<Libro, int>
         using var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection();
         connection.Open();
 
-        const string query = "SELECT LibroId, Titulo FROM libro";
+        const string query = "SELECT LibroId, Titulo FROM libro WHERE Estado = 1";
 
         using var command = new MySqlCommand(query, connection);
         using var reader = command.ExecuteReader();

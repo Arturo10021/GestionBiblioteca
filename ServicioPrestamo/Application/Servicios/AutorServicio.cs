@@ -18,9 +18,9 @@ public class AutorServicio : IAutorServicio
         _autorRepositorio = autorRepositorio;
     }
 
-    public IEnumerable<Autor> Select() 
+    public IEnumerable<Autor> Select(bool incluirInactivos = false)
     {
-        var autores = _autorRepositorio.GetAll();
+        var autores = _autorRepositorio.GetAll(!incluirInactivos);
         return autores.Select(a => new Autor
         {
             AutorId = a.AutorId,
@@ -47,6 +47,7 @@ public class AutorServicio : IAutorServicio
             Nacionalidad = Autor.Nacionalidad,
             FechaNacimiento = Autor.FechaNacimiento,
             Estado = Autor.Estado,
+            UsuarioSesionId = Autor.UsuarioSesionId,
             RouteToken = Guid.NewGuid().ToString("N"),
             FechaRegistro = DateTime.UtcNow
         };
@@ -78,6 +79,7 @@ public class AutorServicio : IAutorServicio
         autorExistente.Nacionalidad = Autor.Nacionalidad;
         autorExistente.FechaNacimiento = Autor.FechaNacimiento;
         autorExistente.Estado = Autor.Estado;
+        autorExistente.UsuarioSesionId = Autor.UsuarioSesionId;
         autorExistente.UltimaActualizacion = DateTime.UtcNow;
 
         _autorRepositorio.Update(autorExistente);

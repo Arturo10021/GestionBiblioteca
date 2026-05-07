@@ -14,9 +14,10 @@ public class AutorAdapter : IAutorServicio
         _http = factory.CreateClient("ServicioPrestamo");
     }
 
-    public IEnumerable<AutorDto> Select()
+    public IEnumerable<AutorDto> Select(bool todos = false)
     {
-        var response = _http.GetAsync("api/autores").Result;
+        var url = todos ? "api/autores?todos=true" : "api/autores";
+        var response = _http.GetAsync(url).Result;
         response.EnsureSuccessStatusCode();
         return response.Content.ReadFromJsonAsync<List<AutorDto>>().Result ?? new();
     }
@@ -81,6 +82,25 @@ public class AutorAdapter : IAutorServicio
         }
     }
 
-    public Dictionary<int, string> ObtenerAutoresActivos() => new();
-    public bool ExisteAutorActivo(int autorId) => true;
+    public Dictionary<int, string> ObtenerAutoresActivos()
+    {
+        try
+        {
+            var response = _http.GetAsync("api/autores/activos").Result;
+            if (!response.IsSuccessStatusCode) return new();
+            return response.Content.ReadFromJsonAsync<Dictionary<int, string>>().Result ?? new();
+        }
+        catch { return new(); }
+    }
+
+    public bool ExisteAutorActivo(int autorId)
+    {
+        try
+        {
+            var response = _http.GetAsync($"api/autores/{autorId}/existe").Result;
+            if (!response.IsSuccessStatusCode) return false;
+            return response.Content.ReadFromJsonAsync<bool>().Result;
+        }
+        catch { return false; }
+    }
 }

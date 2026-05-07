@@ -26,7 +26,7 @@ public class IndexModel : PageModel
             return LocalRedirect("/");
         }
 
-        Libros = _libroServicio.Select();
+        Libros = _libroServicio.Select(todos: EsAdmin());
         return Page();
     }
 
@@ -36,5 +36,11 @@ public class IndexModel : PageModel
 
         return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool EsAdmin()
+    {
+        var rol = HttpContext.Session.GetString(SessionKeys.Rol);
+        return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase);
     }
 }

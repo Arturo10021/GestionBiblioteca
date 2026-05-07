@@ -54,7 +54,7 @@ public class PrestamoModel : PageModel
 
     public IActionResult OnGet()
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
         {
             return LocalRedirect("/");
         }
@@ -73,7 +73,7 @@ public class PrestamoModel : PageModel
 
     public JsonResult OnGetAutocompleteEjemplares(string q)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         var items = _prestamoFachada.BuscarEjemplaresActivos(q ?? string.Empty)
@@ -84,7 +84,7 @@ public class PrestamoModel : PageModel
 
     public JsonResult OnGetEjemplarDetalle(int id)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         var EjemplarDto = _prestamoFachada.ObtenerEjemplarPorId(id);
@@ -104,7 +104,7 @@ public class PrestamoModel : PageModel
 
     public JsonResult OnGetAutocompleteLectores(string q)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         // Retorna solo CIs para el autocomplete
@@ -116,7 +116,7 @@ public class PrestamoModel : PageModel
 
     public JsonResult OnGetBuscarLectorPorCi(string ci, string? complemento)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         if (string.IsNullOrWhiteSpace(ci))
@@ -139,7 +139,7 @@ public class PrestamoModel : PageModel
     // DEBUG: Ver todos los lectores en la BD
     public JsonResult OnGetDebugLectores()
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         var tabla = _prestamoFachada.ObtenerTodosLosLectores(); // Will implement this method
@@ -149,7 +149,7 @@ public class PrestamoModel : PageModel
     // Handler para creación desde la página Create. Recibe una lista de ids de EjemplarDto como cadena JSON.
     public IActionResult OnPostCrear(string EjemplarData, int LectorId, DateTime FechaDevolucionEsperada, string? LectorCi, string? LectorComp)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
         {
             return LocalRedirect("/");
         }
@@ -293,7 +293,7 @@ public class PrestamoModel : PageModel
 
     public IActionResult OnPostCrearLector()
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
         {
             return LocalRedirect("/");
         }
@@ -321,7 +321,7 @@ public class PrestamoModel : PageModel
 
     private void CargarPrestamos()
     {
-        var prestamosDto = _prestamoServicio.Select();
+        var prestamosDto = _prestamoServicio.Select(todos: EsAdmin());
 
         Prestamos = new List<PrestamoEntity>();
         foreach (var row in prestamosDto)
@@ -452,7 +452,7 @@ public class PrestamoModel : PageModel
 
     public JsonResult OnGetDetallesPrestamo(int id)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         var PrestamoDto = PrestamosDetallados.FirstOrDefault(p => p.PrestamoId == id);
@@ -471,7 +471,7 @@ public class PrestamoModel : PageModel
 
     public JsonResult OnGetComprobantePrestamo(int id)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
             return JsonAccesoDenegado();
 
         try
@@ -579,7 +579,7 @@ public class PrestamoModel : PageModel
 
     public IActionResult OnPostAnularPrestamo(int prestamoId)
     {
-        if (!UsuarioEsBibliotecario())
+        if (!EsAdminOBibliotecario())
         {
             return LocalRedirect("/");
         }
@@ -643,10 +643,17 @@ public class PrestamoModel : PageModel
         return null;
     }
 
-    private bool UsuarioEsBibliotecario()
+    private bool EsAdminOBibliotecario()
     {
         var rolSesion = HttpContext.Session.GetString(SessionKeys.Rol);
-        return string.Equals(rolSesion, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(rolSesion, Roles.Bibliotecario, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rolSesion, Roles.Admin, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool EsAdmin()
+    {
+        var rol = HttpContext.Session.GetString(SessionKeys.Rol);
+        return string.Equals(rol, Roles.Admin, StringComparison.OrdinalIgnoreCase);
     }
 
     private JsonResult JsonAccesoDenegado()

@@ -6,7 +6,7 @@ namespace Frontend.Adapters;
 
 public interface IEjemplarServicio
 {
-    IEnumerable<EjemplarDto> Select();
+    IEnumerable<EjemplarDto> Select(bool todos = false);
     Result<EjemplarDto> Create(EjemplarDto dto);
     Result<EjemplarDto> Update(EjemplarDto dto);
     Result Delete(EjemplarDto dto);
