@@ -498,7 +498,7 @@ else
     </div>
 }
 
-            <input type="hidden" id="createLibroIdHidden" name="Ejemplar.LibroId" value="@createLibroId" />
+            <input type="hidden" id="createLibroIdHidden" name="EjemplarDto.LibroId" value="@createLibroId" />
 
             <div class="libro-search-wrapper">
                 <input type="text"
@@ -535,17 +535,17 @@ else
                   <span class="codigo-inventario-sufijo">-@DateTime.Now.Year</span>
                  </div>
                  <input type="hidden"
-                     name="Ejemplar.CodigoInventario"
+                     name="EjemplarDto.CodigoInventario"
                      id="createCodigoInventario"
                      value="@createCodigoInventarioCompleto" />
-            @if (ViewData.ModelState.ContainsKey("Ejemplar.CodigoInventario"))
+            @if (ViewData.ModelState.ContainsKey("EjemplarDto.CodigoInventario"))
             {
                 <span class="text-error">
-                    @ViewData.ModelState["Ejemplar.CodigoInventario"]?.Errors.FirstOrDefault()?.ErrorMessage
+                    @ViewData.ModelState["EjemplarDto.CodigoInventario"]?.Errors.FirstOrDefault()?.ErrorMessage
                 </span>
             }
 
-            <select name="Ejemplar.EstadoConservacion"
+            <select name="EjemplarDto.EstadoConservacion"
                     id="createEstadoConservacion"
                     class="input-form">
                 <option value="">Seleccione...</option>
@@ -557,7 +557,7 @@ else
             </select>
 
             <div class="custom-select-wrapper">
-                <input type="hidden" name="Ejemplar.Ubicacion" id="createUbicacionValue" value="@createUbicacion" />
+                <input type="hidden" name="EjemplarDto.Ubicacion" id="createUbicacionValue" value="@createUbicacion" />
 
                 <div class="custom-select" id="custom-select-ubicacion-create">
                     <div class="select-trigger">
@@ -591,28 +591,28 @@ else
             <div class="form-check modal-check">
                 <input type="checkbox"
                        id="createDisponible"
-                       name="Ejemplar.Disponible"
+                       name="EjemplarDto.Disponible"
                        value="true"
                        class="check-input"
                        checked="@(createDisponibleChecked ? "checked" : null)" />
                 <label for="createDisponible">Disponible para préstamo</label>
             </div>
-            <input type="hidden" name="Ejemplar.Disponible" value="false" />
+            <input type="hidden" name="EjemplarDto.Disponible" value="false" />
 
             <div class="form-check modal-check">
                 <input type="checkbox"
                        id="createDadoBajaCheck"
-                       name="Ejemplar.DadoDeBaja"
+                       name="EjemplarDto.DadoDeBaja"
                        value="true"
                        class="check-input"
                        onchange="toggleMotivoBajaCrear()"
                        checked="@(createDadoDeBajaChecked ? "checked" : null)" />
                 <label for="createDadoBajaCheck">Dado de baja</label>
             </div>
-            <input type="hidden" name="Ejemplar.DadoDeBaja" value="false" />
+            <input type="hidden" name="EjemplarDto.DadoDeBaja" value="false" />
 
             <div id="createMotivoBajaDiv" style="display:@(createDadoDeBajaChecked ? "block" : "none")">
-                <textarea name="Ejemplar.MotivoBaja"
+                <textarea name="EjemplarDto.MotivoBaja"
                           id="createMotivoBaja"
                           class="input-form"
                           rows="3"
@@ -622,13 +622,13 @@ else
             <div class="form-check modal-check">
                 <input type="checkbox"
                        id="createEstado"
-                       name="Ejemplar.Estado"
+                       name="EjemplarDto.Estado"
                        value="true"
                        class="check-input"
                        checked="@(createEstadoChecked ? "checked" : null)" />
                 <label for="createEstado">Activo en el sistema</label>
             </div>
-            <input type="hidden" name="Ejemplar.Estado" value="false" />
+            <input type="hidden" name="EjemplarDto.Estado" value="false" />
 
             <div class="modal-buttons">
                 <button type="submit" class="btn-success">Crear ejemplar</button>
