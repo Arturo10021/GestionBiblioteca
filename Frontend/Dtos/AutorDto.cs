@@ -5,6 +5,7 @@ namespace Frontend.Dtos;
 public class AutorDto
 {
     public int AutorId { get; set; }
+    public int? UsuarioSesionId { get; set; }
     public string Nombres { get; set; } = string.Empty;
     public string? Apellidos { get; set; }
     public string? Nacionalidad { get; set; }

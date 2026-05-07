@@ -63,11 +63,14 @@ public class AutorAdapter : IAutorServicio
         }
     }
 
-    public Result Delete(int id)
+    public Result Delete(int id, int? usuarioSesionId)
     {
         try
         {
-            var response = _http.DeleteAsync($"api/autores/{id}").Result;
+            var url = $"api/autores/{id}";
+            if (usuarioSesionId.HasValue)
+                url += $"?sid={usuarioSesionId.Value}";
+            var response = _http.DeleteAsync(url).Result;
             return response.IsSuccessStatusCode
                 ? Result.Success()
                 : Result.Failure(new Error("Delete", "Error al eliminar"));

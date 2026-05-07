@@ -9,7 +9,7 @@ public interface IAutorServicio
     IEnumerable<Autor> Select();
     Result<Autor> Create(Autor Autor);
     Result<Autor> Update(Autor Autor);
-    Result Delete(int autorId);
+    Result Delete(int autorId, int? usuarioSesionId);
     Autor? GetById(int id);
 
     Dictionary<int, string> ObtenerAutoresActivos();
