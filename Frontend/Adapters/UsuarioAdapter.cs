@@ -125,11 +125,43 @@ public class UsuarioAdapter : IUsuarioServicio
 
     public string JoinCiComp(string ci, string comp) => string.IsNullOrWhiteSpace(comp) ? ci : $"{ci}-{comp}";
 
+    public async Task<Result> CambiarPasswordAsync(int usuarioId, string passwordActual, string passwordNueva, string passwordConfirmacion, CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new
+            {
+                passwordActual = (passwordActual ?? string.Empty).Trim(),
+                passwordNueva = (passwordNueva ?? string.Empty).Trim(),
+                passwordConfirmacion = (passwordConfirmacion ?? string.Empty).Trim()
+            };
+
+            var response = await _http.PostAsJsonAsync($"api/usuarios/{usuarioId}/cambiar-password", payload, ct);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Result.Success();
+            }
+
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            var fallback = "No se pudo cambiar la contrasena.";
+            var message = TryExtractApiMessage(errorBody) ?? fallback;
+            return Result.Failure(new Error("ChangePassword", message));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(new Error("ChangePassword", ex.Message));
+        }
+    }
+
     public Result<UsuarioDto> Login(string user, string pass)
     {
         try
         {
-            var response = _http.PostAsJsonAsync("api/usuarios/login", new { nombreUsuario = user, password = pass }).Result;
+            var normalizedUser = (user ?? string.Empty).Trim();
+            var normalizedPass = (pass ?? string.Empty).Trim();
+
+            var response = _http.PostAsJsonAsync("api/usuarios/login", new { nombreUsuario = normalizedUser, password = normalizedPass }).Result;
             if (!response.IsSuccessStatusCode)
                 return Result<UsuarioDto>.Failure(new Error("Login", "Credenciales inválidas"));
 
@@ -140,11 +172,12 @@ public class UsuarioAdapter : IUsuarioServicio
             return Result<UsuarioDto>.Success(new UsuarioDto
             {
                 UsuarioId = dto.UsuarioId,
-                NombreUsuario = dto.NombreUsuario ?? user,
+                NombreUsuario = dto.NombreUsuario ?? normalizedUser,
                 Nombres = dto.Nombres,
                 PrimerApellido = dto.PrimerApellido,
                 Rol = dto.Rol,
-                Estado = dto.Estado
+                Estado = dto.Estado,
+                DebeCambiarPassword = dto.DebeCambiarPassword
             });
         }
         catch (Exception ex)
@@ -165,5 +198,28 @@ public class UsuarioAdapter : IUsuarioServicio
         {
             return null;
         }
+    }
+
+    private static string? TryExtractApiMessage(string? responseBody)
+    {
+        if (string.IsNullOrWhiteSpace(responseBody))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(responseBody);
+            if (document.RootElement.TryGetProperty("message", out var messageElement))
+            {
+                return messageElement.GetString();
+            }
+        }
+        catch
+        {
+            // Si no es JSON valido, devolvemos el texto original.
+        }
+
+        return responseBody;
     }
 }
