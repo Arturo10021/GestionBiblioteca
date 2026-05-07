@@ -1,63 +1,61 @@
 using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
 using ServicioUsuario.Application.Interfaces;
+using ServicioUsuario.Infrastructure.Configuration;
 
 namespace ServicioUsuario.Infrastructure.Email;
 
 public class SmtpEmailSender : IEmailSender
 {
-    private readonly IConfiguration _configuration;
+    private readonly EmailSettings _settings;
     private readonly ILogger<SmtpEmailSender> _logger;
 
-    public SmtpEmailSender(IConfiguration configuration, ILogger<SmtpEmailSender> logger)
+    public SmtpEmailSender(IOptions<EmailSettings> options, ILogger<SmtpEmailSender> logger)
     {
-        _configuration = configuration;
+        _settings = options.Value;
         _logger = logger;
     }
 
     public async Task<bool> SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
     {
-        var useDevMode = _configuration.GetValue<bool>("Email:UseDevelopmentMode");
-        var fromName = _configuration["Email:FromName"] ?? "Sistema Bibliotecario";
-        var fromAddress = _configuration["Email:FromAddress"] ?? "biblioteca@starbook.com";
-        var host = _configuration["Email:Smtp:Host"];
-        var port = _configuration.GetValue<int>("Email:Smtp:Port", 587);
-        var username = _configuration["Email:Smtp:Username"];
-        var password = _configuration["Email:Smtp:Password"];
+        cancellationToken.ThrowIfCancellationRequested();
 
-        if (useDevMode || string.IsNullOrWhiteSpace(host))
+        if (_settings.UseDevelopmentMode || string.IsNullOrWhiteSpace(_settings.Smtp.Host))
         {
             _logger.LogWarning("Email dev mode: To={To}, Subject={Subject}, Body={Body}",
                 message.To, message.Subject, message.PlainTextContent);
             return true;
         }
 
-        try
+        if (string.IsNullOrWhiteSpace(_settings.FromAddress))
         {
-            using var client = new SmtpClient(host, port)
-            {
-                EnableSsl = true,
-                Credentials = new NetworkCredential(username, password)
-            };
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(fromAddress, fromName),
-                Subject = message.Subject,
-                Body = message.PlainTextContent ?? message.HtmlContent,
-                IsBodyHtml = !string.IsNullOrWhiteSpace(message.HtmlContent)
-            };
-
-            mailMessage.To.Add(message.To);
-
-            await client.SendMailAsync(mailMessage, cancellationToken);
-            _logger.LogInformation("Email sent to {To}", message.To);
-            return true;
+            throw new InvalidOperationException("Email.FromAddress no esta configurado.");
         }
-        catch (Exception ex)
+
+        if (string.IsNullOrWhiteSpace(_settings.Smtp.Username) || string.IsNullOrWhiteSpace(_settings.Smtp.Password))
         {
-            _logger.LogError(ex, "Failed to send email to {To}: {Error}", message.To, ex.Message);
-            throw;
+            throw new InvalidOperationException("Credenciales SMTP no configuradas.");
         }
+
+        using var client = new SmtpClient(_settings.Smtp.Host, _settings.Smtp.Port)
+        {
+            EnableSsl = _settings.Smtp.EnableSsl,
+            Credentials = new NetworkCredential(_settings.Smtp.Username, _settings.Smtp.Password)
+        };
+
+        using var mail = new MailMessage
+        {
+            From = new MailAddress(_settings.FromAddress, _settings.FromName),
+            Subject = message.Subject,
+            Body = message.PlainTextContent,
+            IsBodyHtml = false
+        };
+
+        mail.To.Add(message.To);
+
+        await client.SendMailAsync(mail, cancellationToken);
+        _logger.LogInformation("Email sent to {To}", message.To);
+        return true;
     }
 }

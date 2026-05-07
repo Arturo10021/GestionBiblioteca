@@ -15,6 +15,9 @@ builder.Configuration.AddJsonFile("emailsettings.json", optional: true, reloadOn
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(EmailSettings.SectionName));
 
 // Repositorio
 builder.Services.AddSingleton<UsuarioRepository>();
@@ -25,6 +28,8 @@ builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 // Servicios
 builder.Services.AddSingleton<IUserCredentialProvisioningService, UserCredentialProvisioningService>();
 builder.Services.AddSingleton<IUsuarioService, UsuarioService>();
+builder.Services.AddSingleton<IEmailSender>(sp => EmailSenderFactory.Create(sp));
+builder.Services.AddSingleton<IUserCredentialProvisioningService, UserCredentialProvisioningService>();
 
 var app = builder.Build();
 

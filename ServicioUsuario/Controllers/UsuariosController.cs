@@ -65,7 +65,7 @@ public class UsuariosController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -99,6 +99,23 @@ public class UsuariosController : ControllerBase
         if (usuario == null)
             return Unauthorized(new { message = "Credenciales inválidas" });
         return Ok(usuario);
+    }
+
+    [HttpPost("{id}/cambiar-password")]
+    public async Task<IActionResult> CambiarPassword(int id, [FromBody] CambiarPasswordDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
+        {
+            await _usuarioService.CambiarPasswordAsync(id, dto.PasswordActual, dto.PasswordNueva, dto.PasswordConfirmacion);
+            return Ok(new { message = "Contrasena actualizada correctamente." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
 

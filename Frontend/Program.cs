@@ -48,6 +48,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseSession();
+
 app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();

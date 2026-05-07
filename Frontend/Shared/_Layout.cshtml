@@ -4,6 +4,9 @@
     var nombreUsuarioSesion = Context.Session.GetString(SessionKeys.NombreUsuario);
     var rolSesion = Context.Session.GetString(SessionKeys.Rol);
     var haySesion = !string.IsNullOrWhiteSpace(Context.Session.GetString(SessionKeys.UsuarioId));
+    var debeCambiarPassword = string.Equals(Context.Session.GetString(SessionKeys.DebeCambiarPassword), "true", StringComparison.OrdinalIgnoreCase);
+    var changePasswordError = TempData["ChangePasswordError"]?.ToString();
+    var changePasswordOk = TempData["ChangePasswordOk"]?.ToString();
     var esAdmin = string.Equals(rolSesion, "Admin", StringComparison.OrdinalIgnoreCase);
     var esBibliotecario = string.Equals(rolSesion, "Bibliotecario", StringComparison.OrdinalIgnoreCase);
     var esLector = string.Equals(rolSesion, "Lector", StringComparison.OrdinalIgnoreCase);
@@ -158,6 +161,11 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu">
                                 <li>
+                                    <button type="button" class="dropdown-item custom-dropdown-item" onclick="abrirModalCambiarPassword()">
+                                        Cambiar contrasena
+                                    </button>
+                                </li>
+                                <li>
                                     <form method="post" action="/Login?handler=Logout">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="dropdown-item custom-dropdown-item">
@@ -244,6 +252,118 @@
     </div>
 }
 
+@if (haySesion)
+{
+    <div id="modalCambiarPassword" class="custom-modal">
+        <div class="modal-box modal-login-box">
+            <div class="modal-icon login">
+                <img src="~/assets/icons/privacy_tip_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                     class="icono-modal" />
+            </div>
+
+            <h2>Cambiar contrasena</h2>
+            <p>
+                @if (debeCambiarPassword)
+                {
+                    <text>Primer inicio detectado. Debes cambiar tu contrasena para continuar.</text>
+                }
+                else
+                {
+                    <text>Ingresa tu contrasena actual y define una nueva contrasena segura.</text>
+                }
+            </p>
+
+            <form method="post" action="/Login?handler=CambiarPasswordModal" id="formCambiarPasswordModal" autocomplete="off" novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+
+                <div id="mensajeCambiarPasswordModal" class="text-error-summary" style="display:none;"></div>
+
+                @if (!string.IsNullOrWhiteSpace(changePasswordError))
+                {
+                    <div id="mensajeCambiarPasswordServidor" class="text-error-summary">
+                        @changePasswordError
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(changePasswordOk))
+                {
+                    <div class="alert-custom alert-success-custom" style="margin-bottom:12px;">
+                        @changePasswordOk
+                    </div>
+                }
+
+                  <div class="password-wrapper">
+                      <input type="password"
+                          name="passwordActualModal"
+                          id="passwordActualModal"
+                          class="input-form password-input"
+                          placeholder="Contrasena actual"
+                          required />
+
+                      <button type="button"
+                        class="toggle-password-btn"
+                        onclick="togglePasswordField('passwordActualModal', 'togglePasswordActualModalIcon')"
+                        aria-label="Mostrar u ocultar contrasena actual">
+                       <img id="togglePasswordActualModalIcon"
+                         src="~/assets/icons/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                         alt="Ver contrasena" />
+                      </button>
+                  </div>
+
+                  <div class="password-wrapper">
+                      <input type="password"
+                          name="passwordNuevaModal"
+                          id="passwordNuevaModal"
+                          class="input-form password-input"
+                          placeholder="Nueva contrasena"
+                          required />
+
+                      <button type="button"
+                        class="toggle-password-btn"
+                        onclick="togglePasswordField('passwordNuevaModal', 'togglePasswordNuevaModalIcon')"
+                        aria-label="Mostrar u ocultar nueva contrasena">
+                       <img id="togglePasswordNuevaModalIcon"
+                         src="~/assets/icons/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                         alt="Ver contrasena" />
+                      </button>
+                  </div>
+
+                  <div class="password-wrapper">
+                      <input type="password"
+                          name="passwordConfirmacionModal"
+                          id="passwordConfirmacionModal"
+                          class="input-form password-input"
+                          placeholder="Confirmar nueva contrasena"
+                          required />
+
+                      <button type="button"
+                        class="toggle-password-btn"
+                        onclick="togglePasswordField('passwordConfirmacionModal', 'togglePasswordConfirmacionModalIcon')"
+                        aria-label="Mostrar u ocultar confirmacion de contrasena">
+                       <img id="togglePasswordConfirmacionModalIcon"
+                         src="~/assets/icons/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+                         alt="Ver contrasena" />
+                      </button>
+                  </div>
+
+                <small class="form-text" style="color: #fff;">
+                    Minimo 8 caracteres, al menos 1 mayuscula, 1 minuscula, 1 numero y 1 caracter especial.
+                </small>
+
+                <div class="modal-buttons" style="margin-top:12px;">
+                    <button type="submit" class="btn-login-modal">Actualizar</button>
+
+                    @if (!debeCambiarPassword)
+                    {
+                        <button type="button" class="btn-secondary" onclick="cerrarModalCambiarPassword()">Cancelar</button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
 <footer class="footer-custom">
     <div class="container footer-content">
         <div class="footer-left">
@@ -268,6 +388,8 @@
 
 @await RenderSectionAsync("Scripts", required: false)
 <script>
+    var primerInicioForzado = @(debeCambiarPassword ? "true" : "false");
+
     function abrirModalLogin() {
         var modal = document.getElementById("modalLogin");
         if (modal) {
@@ -282,9 +404,42 @@
         }
     }
 
+    function abrirModalCambiarPassword() {
+        var modal = document.getElementById("modalCambiarPassword");
+        if (modal) {
+            modal.style.display = "flex";
+        }
+    }
+
+    function cerrarModalCambiarPassword() {
+        if (primerInicioForzado) {
+            return;
+        }
+
+        var modal = document.getElementById("modalCambiarPassword");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    }
+
     function togglePasswordLogin() {
         var input = document.getElementById("loginPassword");
         var icon = document.getElementById("togglePasswordIcon");
+
+        if (!input || !icon) return;
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.src = "/assets/icons/visibility_off_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
+        } else {
+            input.type = "password";
+            icon.src = "/assets/icons/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg";
+        }
+    }
+
+    function togglePasswordField(inputId, iconId) {
+        var input = document.getElementById(inputId);
+        var icon = document.getElementById(iconId);
 
         if (!input || !icon) return;
 
@@ -311,6 +466,14 @@
         }, 3500);
     }
 
+    function mostrarErrorCambiarPassword(mensaje) {
+        var box = document.getElementById("mensajeCambiarPasswordModal");
+        if (!box) return;
+
+        box.textContent = mensaje;
+        box.style.display = "block";
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         var form = document.getElementById("formLoginModal");
         var usuario = document.getElementById("loginNombreUsuario");
@@ -319,6 +482,16 @@
 
         if (mensajeServidor) {
             abrirModalLogin();
+        }
+
+        var formCambiarPassword = document.getElementById("formCambiarPasswordModal");
+        var passwordActualModal = document.getElementById("passwordActualModal");
+        var passwordNuevaModal = document.getElementById("passwordNuevaModal");
+        var passwordConfirmacionModal = document.getElementById("passwordConfirmacionModal");
+        var mensajeCambiarPasswordServidor = document.getElementById("mensajeCambiarPasswordServidor");
+
+        if (primerInicioForzado || mensajeCambiarPasswordServidor) {
+            abrirModalCambiarPassword();
         }
 
         function limpiarMensajes() {
@@ -353,12 +526,37 @@
                 }
             });
         }
+
+        if (formCambiarPassword) {
+            formCambiarPassword.addEventListener("submit", function (e) {
+                var actual = (passwordActualModal && passwordActualModal.value ? passwordActualModal.value : "").trim();
+                var nueva = (passwordNuevaModal && passwordNuevaModal.value ? passwordNuevaModal.value : "").trim();
+                var confirmacion = (passwordConfirmacionModal && passwordConfirmacionModal.value ? passwordConfirmacionModal.value : "").trim();
+
+                if (!actual || !nueva || !confirmacion) {
+                    e.preventDefault();
+                    mostrarErrorCambiarPassword("Debes completar todos los campos.");
+                    return;
+                }
+
+                if (nueva !== confirmacion) {
+                    e.preventDefault();
+                    mostrarErrorCambiarPassword("La nueva contrasena y su confirmacion no coinciden.");
+                    return;
+                }
+            });
+        }
     });
 
     window.addEventListener("click", function (e) {
         var modal = document.getElementById("modalLogin");
         if (modal && e.target === modal) {
             cerrarModalLogin();
+        }
+
+        var modalCambiarPassword = document.getElementById("modalCambiarPassword");
+        if (modalCambiarPassword && e.target === modalCambiarPassword) {
+            cerrarModalCambiarPassword();
         }
     });
 
