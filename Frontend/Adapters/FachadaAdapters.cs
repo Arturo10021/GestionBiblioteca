@@ -1,8 +1,6 @@
-﻿using Frontend.Dtos;
-using Frontend.Adapters;
-using Frontend.Adapters;
-using Frontend.Helpers;
+﻿using System.Net.Http.Json;
 using Frontend.Dtos;
+using Frontend.Helpers;
 
 namespace Frontend.Adapters;
 
@@ -50,7 +48,27 @@ public class PrestamoFachadaAdapter : IPrestamoFachada
 
 public class AnulacionFachadaAdapter : IAnulacionFachada
 {
-    public Result AnularPrestamo(int id, int? uid, string m) => Result.Success();
+    private readonly HttpClient _http;
+
+    public AnulacionFachadaAdapter(IHttpClientFactory factory)
+    {
+        _http = factory.CreateClient("ServicioPrestamo");
+    }
+
+    public Result AnularPrestamo(int id, int? uid, string m)
+    {
+        try
+        {
+            var response = _http.PostAsJsonAsync($"api/prestamos/{id}/anular", new { usuarioSesionId = uid, motivo = m }).Result;
+            return response.IsSuccessStatusCode
+                ? Result.Success()
+                : Result.Failure(new Error("Anulacion", "Error al anular el préstamo."));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(new Error("Anulacion", ex.Message));
+        }
+    }
 }
 
 public class EjemplarDisponibilidadFachadaAdapter : IEjemplarDisponibilidadFachada
@@ -60,11 +78,53 @@ public class EjemplarDisponibilidadFachadaAdapter : IEjemplarDisponibilidadFacha
 
 public class PrestamoServicioAdapter : IPrestamoServicio
 {
-    public IEnumerable<PrestamoDto> Select() => new List<PrestamoDto>();
+    private readonly HttpClient _http;
+
+    public PrestamoServicioAdapter(IHttpClientFactory factory)
+    {
+        _http = factory.CreateClient("ServicioPrestamo");
+    }
+
+    public IEnumerable<PrestamoDto> Select()
+    {
+        try
+        {
+            var response = _http.GetAsync("api/prestamos").Result;
+            if (!response.IsSuccessStatusCode) return new List<PrestamoDto>();
+            return response.Content.ReadFromJsonAsync<List<PrestamoDto>>().Result ?? new List<PrestamoDto>();
+        }
+        catch { return new List<PrestamoDto>(); }
+    }
+
     public Result<PrestamoDto> Create(PrestamoDto d) => Result<PrestamoDto>.Failure(new Error("NotImpl", "Not implemented"));
     public Result<PrestamoDto> Update(PrestamoDto d) => Result<PrestamoDto>.Failure(new Error("NotImpl", "Not implemented"));
-    public Result Delete(PrestamoDto d) => Result.Failure(new Error("NotImpl", "Not implemented"));
-    public PrestamoDto? GetById(int id) => null;
+
+    public Result Delete(PrestamoDto d)
+    {
+        try
+        {
+            var response = _http.DeleteAsync($"api/prestamos/{d.PrestamoId}").Result;
+            return response.IsSuccessStatusCode
+                ? Result.Success()
+                : Result.Failure(new Error("Prestamo", "Error al eliminar."));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(new Error("Prestamo", ex.Message));
+        }
+    }
+
+    public PrestamoDto? GetById(int id)
+    {
+        try
+        {
+            var response = _http.GetAsync($"api/prestamos/{id}").Result;
+            if (!response.IsSuccessStatusCode) return null;
+            return response.Content.ReadFromJsonAsync<PrestamoDto>().Result;
+        }
+        catch { return null; }
+    }
+
     public Result ValidarPrestamo(PrestamoDto p) => Result.Success();
     public int CountPrestamosActivos(int id) => 0;
     public int InsertAndReturnId(PrestamoDto p) => 0;
@@ -72,8 +132,39 @@ public class PrestamoServicioAdapter : IPrestamoServicio
 
 public class DetalleServicioAdapter : IDetalleServicio
 {
-    public IEnumerable<DetalleDto> Select() => new List<DetalleDto>();
-    public IEnumerable<DetalleDto> ObtenerPorPrestamo(int id) => new List<DetalleDto>();
-    public IEnumerable<DetalleDto> ObtenerTodos() => new List<DetalleDto>();
+    private readonly HttpClient _http;
+
+    public DetalleServicioAdapter(IHttpClientFactory factory)
+    {
+        _http = factory.CreateClient("ServicioPrestamo");
+    }
+
+    public IEnumerable<DetalleDto> Select()
+    {
+        return ObtenerTodos();
+    }
+
+    public IEnumerable<DetalleDto> ObtenerPorPrestamo(int prestamoId)
+    {
+        try
+        {
+            var response = _http.GetAsync($"api/detalles/prestamo/{prestamoId}").Result;
+            if (!response.IsSuccessStatusCode) return new List<DetalleDto>();
+            return response.Content.ReadFromJsonAsync<List<DetalleDto>>().Result ?? new List<DetalleDto>();
+        }
+        catch { return new List<DetalleDto>(); }
+    }
+
+    public IEnumerable<DetalleDto> ObtenerTodos()
+    {
+        try
+        {
+            var response = _http.GetAsync("api/detalles").Result;
+            if (!response.IsSuccessStatusCode) return new List<DetalleDto>();
+            return response.Content.ReadFromJsonAsync<List<DetalleDto>>().Result ?? new List<DetalleDto>();
+        }
+        catch { return new List<DetalleDto>(); }
+    }
+
     public Result CrearMultiples(IEnumerable<DetalleDto> d) => Result.Success();
 }

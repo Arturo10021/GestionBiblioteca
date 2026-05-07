@@ -9,12 +9,10 @@ namespace ServicioPrestamo.Application.Services;
 public class DetalleServicio : IDetalleServicio
 {
     private readonly DetalleRepository _detalleRepositorio;
-    private readonly EjemplarRepository _ejemplarRepositorio;
 
-    public DetalleServicio(DetalleRepository detalleRepositorio, EjemplarRepository ejemplarRepositorio)
+    public DetalleServicio(DetalleRepository detalleRepositorio)
     {
         _detalleRepositorio = detalleRepositorio;
-        _ejemplarRepositorio = ejemplarRepositorio;
     }
 
     public IEnumerable<Detalle> ObtenerTodos()
@@ -38,16 +36,6 @@ public class DetalleServicio : IDetalleServicio
         {
             ValidarDetalle(detalle);
             _detalleRepositorio.Insert(detalle);
-            
-            // Marcar ejemplar como no disponible
-            var ejemplar = _ejemplarRepositorio.GetById(detalle.EjemplarId);
-            if (ejemplar != null)
-            {
-                ejemplar.Disponible = false;
-                ejemplar.UsuarioSesionId = detalle.UsuarioSesionId ?? ejemplar.UsuarioSesionId;
-                _ejemplarRepositorio.Update(ejemplar);
-            }
-            
             return Result.Success();
         }
         catch (Exception ex)
@@ -66,19 +54,6 @@ public class DetalleServicio : IDetalleServicio
             }
 
             _detalleRepositorio.InsertMany(detalles);
-            
-            // Marcar ejemplares como no disponibles
-            foreach (var detalle in detalles)
-            {
-                var ejemplar = _ejemplarRepositorio.GetById(detalle.EjemplarId);
-                if (ejemplar != null)
-                {
-                    ejemplar.Disponible = false;
-                    ejemplar.UsuarioSesionId = detalle.UsuarioSesionId ?? ejemplar.UsuarioSesionId;
-                    _ejemplarRepositorio.Update(ejemplar);
-                }
-            }
-            
             return Result.Success();
         }
         catch (Exception ex)

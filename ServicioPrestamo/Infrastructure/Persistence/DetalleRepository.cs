@@ -22,6 +22,7 @@ public class DetalleRepository : IRepository<Detalle, int>
         string query = @"SELECT d.DetalleId, d.PrestamoId, d.EjemplarId, d.EstadoDetalle, d.FechaDevolucionReal, 
                         d.ObservacionesSalida, d.ObservacionesEntrada, d.UsuarioSesionId, d.FechaRegistro, d.UltimaActualizacion
                          FROM detalle d
+                         WHERE d.EstadoDetalle = 1
                          ORDER BY d.FechaRegistro DESC;";
 
         using MySqlCommand command = new MySqlCommand(query, connection);

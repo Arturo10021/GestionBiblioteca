@@ -22,22 +22,19 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Concrete repositories
+// Repositorios
 builder.Services.AddScoped<AutorRepository>();
 builder.Services.AddScoped<LibroRepository>();
 builder.Services.AddScoped<EjemplarRepository>();
 builder.Services.AddScoped<PrestamoRepository>();
 builder.Services.AddScoped<DetalleRepository>();
 
-// Services
+// Servicios de Aplicación
 builder.Services.AddScoped<IAutorServicio, AutorServicio>();
 builder.Services.AddScoped<ILibroServicio, LibroServicio>();
 builder.Services.AddScoped<IEjemplarServicio, EjemplarServicio>();
 builder.Services.AddScoped<IPrestamoServicio, PrestamoServicio>();
-builder.Services.AddScoped<IDetalleServicio>(sp => new DetalleServicio(
-    sp.GetRequiredService<DetalleRepository>(),
-    sp.GetRequiredService<EjemplarRepository>()
-));
+builder.Services.AddScoped<IDetalleServicio, DetalleServicio>();
 
 // Fachadas
 builder.Services.AddScoped<IPrestamoFachada, PrestamoFachada>();
