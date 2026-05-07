@@ -22,14 +22,12 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(Email
 // Repositorio
 builder.Services.AddSingleton<UsuarioRepository>();
 
-// Email sender
-builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+// Email sender (via factory: SMTP, Dev, or HTTP based on config)
+builder.Services.AddSingleton<IEmailSender>(sp => EmailSenderFactory.Create(sp));
 
 // Servicios
 builder.Services.AddSingleton<IUserCredentialProvisioningService, UserCredentialProvisioningService>();
 builder.Services.AddSingleton<IUsuarioService, UsuarioService>();
-builder.Services.AddSingleton<IEmailSender>(sp => EmailSenderFactory.Create(sp));
-builder.Services.AddSingleton<IUserCredentialProvisioningService, UserCredentialProvisioningService>();
 
 var app = builder.Build();
 
