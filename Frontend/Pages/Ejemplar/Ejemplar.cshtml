@@ -70,28 +70,28 @@
 
     bool editEstadoChecked = ObtenerCheckDesdeModelState("Estado");
 
-    string createCodigo = ViewData.ModelState.ContainsKey("Ejemplar.CodigoInventario")
-        ? ViewData.ModelState["Ejemplar.CodigoInventario"]?.AttemptedValue ?? ""
+    string createCodigo = ViewData.ModelState.ContainsKey("EjemplarDto.CodigoInventario")
+        ? ViewData.ModelState["EjemplarDto.CodigoInventario"]?.AttemptedValue ?? ""
         : "";
 
-    string createEstadoConservacion = ViewData.ModelState.ContainsKey("Ejemplar.EstadoConservacion")
-        ? ViewData.ModelState["Ejemplar.EstadoConservacion"]?.AttemptedValue ?? ""
+    string createEstadoConservacion = ViewData.ModelState.ContainsKey("EjemplarDto.EstadoConservacion")
+        ? ViewData.ModelState["EjemplarDto.EstadoConservacion"]?.AttemptedValue ?? ""
         : "";
 
-    string createUbicacion = ViewData.ModelState.ContainsKey("Ejemplar.Ubicacion")
-        ? ViewData.ModelState["Ejemplar.Ubicacion"]?.AttemptedValue ?? ""
+    string createUbicacion = ViewData.ModelState.ContainsKey("EjemplarDto.Ubicacion")
+        ? ViewData.ModelState["EjemplarDto.Ubicacion"]?.AttemptedValue ?? ""
         : "";
 
-    string createMotivoBaja = ViewData.ModelState.ContainsKey("Ejemplar.MotivoBaja")
-        ? ViewData.ModelState["Ejemplar.MotivoBaja"]?.AttemptedValue ?? ""
+    string createMotivoBaja = ViewData.ModelState.ContainsKey("EjemplarDto.MotivoBaja")
+        ? ViewData.ModelState["EjemplarDto.MotivoBaja"]?.AttemptedValue ?? ""
         : "";
 
-    string createLibroId = ViewData.ModelState.ContainsKey("Ejemplar.LibroId")
-        ? ViewData.ModelState["Ejemplar.LibroId"]?.AttemptedValue ?? ""
+    string createLibroId = ViewData.ModelState.ContainsKey("EjemplarDto.LibroId")
+        ? ViewData.ModelState["EjemplarDto.LibroId"]?.AttemptedValue ?? ""
         : "";
 
-    string createCodigoInventarioValor = ViewData.ModelState.ContainsKey("Ejemplar.CodigoInventario")
-        ? ViewData.ModelState["Ejemplar.CodigoInventario"]?.AttemptedValue ?? ""
+    string createCodigoInventarioValor = ViewData.ModelState.ContainsKey("EjemplarDto.CodigoInventario")
+        ? ViewData.ModelState["EjemplarDto.CodigoInventario"]?.AttemptedValue ?? ""
         : "";
 
     string createCodigoInventarioNumero = createCodigoInventarioValor;
@@ -114,11 +114,13 @@
         }
     }
 
-    bool createDisponibleChecked = ObtenerCheckDesdeModelState("Ejemplar.Disponible");
+    bool createDisponibleChecked = !ViewData.ModelState.ContainsKey("EjemplarDto.Disponible")
+        || ObtenerCheckDesdeModelState("EjemplarDto.Disponible");
 
-    bool createDadoDeBajaChecked = ObtenerCheckDesdeModelState("Ejemplar.DadoDeBaja");
+    bool createDadoDeBajaChecked = ObtenerCheckDesdeModelState("EjemplarDto.DadoDeBaja");
 
-    bool createEstadoChecked = ObtenerCheckDesdeModelState("Ejemplar.Estado");
+    bool createEstadoChecked = !ViewData.ModelState.ContainsKey("EjemplarDto.Estado")
+        || ObtenerCheckDesdeModelState("EjemplarDto.Estado");
 
     string createLibroTexto = "";
     if (!string.IsNullOrWhiteSpace(createLibroId))
@@ -925,7 +927,7 @@ window.onclick = function (e) {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var errorCrear =
-                @Html.Raw((ViewData.ModelState.Keys.Any(k => k.StartsWith("Ejemplar.")) || !string.IsNullOrWhiteSpace(Model.ErrorMessage)).ToString().ToLower());
+                @Html.Raw((ViewData.ModelState.Keys.Any(k => k.StartsWith("EjemplarDto.")) || !string.IsNullOrWhiteSpace(Model.ErrorMessage)).ToString().ToLower());
 
             var errorEditar =
                 @Html.Raw((ViewData.ModelState.ContainsKey("CodigoInventario") || ViewData.ModelState.ContainsKey(string.Empty)).ToString().ToLower());

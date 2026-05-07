@@ -990,15 +990,15 @@ function mostrarErroresCrear(errors) {
         const mensajeError = mensajeArray[0];
         if (!mensajeError) return;
 
-        const nombreCampo = campo.replace('Libro.', '');
+        const nombreCampo = campo.replace('Libro.', '').replace('A�oPublicacion', 'AñoPublicacion');
         const elementoError = document.getElementById(`error-create-${nombreCampo}`);
 
         if (elementoError) {
             elementoError.textContent = mensajeError;
             elementoError.style.display = 'block';
-            hayErrores = true;
         }
 
+        hayErrores = true;
         mensajeResumen += `<li>${mensajeError}</li>`;
     });
 
@@ -1024,15 +1024,15 @@ function mostrarErroresEditar(errors) {
         const mensajeError = mensajeArray[0];
         if (!mensajeError) return;
 
-        const nombreCampo = campo.replace('Libro.', '');
+        const nombreCampo = campo.replace('Libro.', '').replace('A�oPublicacion', 'AñoPublicacion');
         const elementoError = document.getElementById(`error-edit-${nombreCampo}`);
 
         if (elementoError) {
             elementoError.textContent = mensajeError;
             elementoError.style.display = 'block';
-            hayErrores = true;
         }
 
+        hayErrores = true;
         mensajeResumen += `<li>${mensajeError}</li>`;
     });
 

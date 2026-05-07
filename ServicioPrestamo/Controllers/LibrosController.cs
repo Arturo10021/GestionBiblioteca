@@ -42,6 +42,12 @@ public class LibrosController : ControllerBase
         return Ok(_libroServicio.ObtenerNombresAutores());
     }
 
+    [HttpGet("autores")]
+    public ActionResult<Dictionary<int, string>> GetAutores()
+    {
+        return Ok(_libroServicio.ObtenerNombresAutores());
+    }
+
     [HttpGet("autores-activos")]
     public ActionResult<IEnumerable<Autor>> GetAutoresActivos()
     {
@@ -52,7 +58,7 @@ public class LibrosController : ControllerBase
     public ActionResult Create([FromBody] CrearLibroRequest request)
     {
         var result = _libroServicio.Create(request.Libro, request.NombreAutorNuevo);
-        return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : Ok();
+        return result.IsFailure ? BadRequest(new { code = result.Error.Code, error = result.Error.Message }) : Ok();
     }
 
     [HttpPut("{id}")]
@@ -61,7 +67,7 @@ public class LibrosController : ControllerBase
         if (id != dto.LibroId)
             return BadRequest(new { error = "El ID no coincide" });
         var result = _libroServicio.Update(dto);
-        return result.IsFailure ? BadRequest(new { error = result.Error.Message }) : NoContent();
+        return result.IsFailure ? BadRequest(new { code = result.Error.Code, error = result.Error.Message }) : NoContent();
     }
 
     [HttpDelete("{id}")]
