@@ -58,8 +58,15 @@ public class UsuariosController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var usuario = await _usuarioService.CreateAsync(dto);
-        return Ok(usuario);
+        try
+        {
+            var usuario = await _usuarioService.CreateAsync(dto);
+            return Ok(usuario);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -92,6 +99,23 @@ public class UsuariosController : ControllerBase
         if (usuario == null)
             return Unauthorized(new { message = "Credenciales inválidas" });
         return Ok(usuario);
+    }
+
+    [HttpPost("{id}/cambiar-password")]
+    public async Task<IActionResult> CambiarPassword(int id, [FromBody] CambiarPasswordDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
+        {
+            await _usuarioService.CambiarPasswordAsync(id, dto.PasswordActual, dto.PasswordNueva, dto.PasswordConfirmacion);
+            return Ok(new { message = "Contrasena actualizada correctamente." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
 

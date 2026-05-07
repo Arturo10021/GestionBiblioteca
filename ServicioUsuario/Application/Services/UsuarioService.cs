@@ -1,8 +1,10 @@
 using ServicioUsuario.Application.Dtos;
+using ServicioUsuario.Application.Interfaces;
 using ServicioUsuario.Domain.Entities;
 using ServicioUsuario.Domain.Ports;
 using ServicioUsuario.Infrastructure.Persistence;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -18,15 +20,18 @@ public interface IUsuarioService
     Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto);
     Task<bool> DeleteAsync(int id);
     Task<UsuarioDto?> LoginAsync(string nombreUsuario, string password);
+    Task CambiarPasswordAsync(int usuarioId, string passwordActual, string passwordNueva, string passwordConfirmacion);
 }
 
 public class UsuarioService : IUsuarioService
 {
     private readonly UsuarioRepository _repositorio;
+    private readonly IUserCredentialProvisioningService _credentialProvisioningService;
 
-    public UsuarioService(UsuarioRepository repositorio)
+    public UsuarioService(UsuarioRepository repositorio, IUserCredentialProvisioningService credentialProvisioningService)
     {
         _repositorio = repositorio;
+        _credentialProvisioningService = credentialProvisioningService;
     }
 
     public Task<List<UsuarioDto>> GetAllAsync()
@@ -57,31 +62,65 @@ public class UsuarioService : IUsuarioService
         return Task.FromResult(usuario != null ? MapToDto(usuario) : null);
     }
 
-    public Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
+    public async Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Email))
+        {
+            throw new InvalidOperationException("El correo electronico es obligatorio.");
+        }
+
+        if (_repositorio.ExisteEmail(dto.Email.Trim()))
+        {
+            throw new InvalidOperationException("Ya existe un usuario registrado con ese correo electronico.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.CI) && _repositorio.ExisteCi(dto.CI.Trim()))
+        {
+            throw new InvalidOperationException("Ya existe un usuario registrado con ese CI.");
+        }
+
         var usuario = new Usuario
         {
-            CI = dto.CI,
+            CI = dto.CI?.Trim() ?? string.Empty,
             Nombres = NormalizeDisplayName(dto.Nombres),
             PrimerApellido = NormalizeDisplayName(dto.PrimerApellido),
             SegundoApellido = NormalizeDisplayName(dto.SegundoApellido),
-            Email = dto.Email,
-            NombreUsuario = !string.IsNullOrWhiteSpace(dto.NombreUsuario)
-                ? dto.NombreUsuario
-                : (!string.IsNullOrWhiteSpace(dto.CI) ? dto.CI : dto.Email),
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? "temporal123"),
+            Email = dto.Email.Trim(),
+            NombreUsuario = null,
+            PasswordHash = null,
             Rol = dto.Rol,
             Estado = true,
             FechaCreacion = DateTime.UtcNow
         };
 
+        if (ShouldAutoProvisionCredentials(dto.Rol))
+        {
+            var provisioning = await _credentialProvisioningService.PrepareAndNotifyAsync(usuario);
+
+            if (!provisioning.EmailSent)
+            {
+                throw new InvalidOperationException($"No se pudo enviar correo de credenciales: {provisioning.EmailError}");
+            }
+        }
+        else
+        {
+            usuario.NombreUsuario = !string.IsNullOrWhiteSpace(dto.NombreUsuario)
+                ? dto.NombreUsuario
+                : (!string.IsNullOrWhiteSpace(dto.CI) ? dto.CI : dto.Email);
+
+            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? "temporal123");
+        }
+
         _repositorio.Insert(usuario);
 
-        var usuarioPersistido = !string.IsNullOrWhiteSpace(usuario.CI)
-            ? _repositorio.GetByCi(usuario.CI)
-            : _repositorio.GetByNombreUsuario(usuario.NombreUsuario ?? string.Empty);
+        // El nombre de usuario es unico y es el mismo que se envia por correo.
+        // Lo priorizamos para evitar confusiones si existe mas de un registro con CI similar.
+        var usuarioPersistido = _repositorio.GetByNombreUsuario(usuario.NombreUsuario ?? string.Empty)
+            ?? (!string.IsNullOrWhiteSpace(usuario.CI)
+                ? _repositorio.GetByCi(usuario.CI)
+                : null);
 
-        return Task.FromResult(MapToDto(usuarioPersistido ?? usuario));
+        return MapToDto(usuarioPersistido ?? usuario);
     }
 
     public Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto)
@@ -117,22 +156,76 @@ public class UsuarioService : IUsuarioService
 
     public Task<UsuarioDto?> LoginAsync(string nombreUsuario, string password)
     {
-        var usuario = _repositorio.GetByNombreUsuario(nombreUsuario);
+        var normalizedUserName = nombreUsuario?.Trim() ?? string.Empty;
+        var normalizedPassword = password?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(normalizedUserName) || string.IsNullOrWhiteSpace(normalizedPassword))
+            return Task.FromResult<UsuarioDto?>(null);
+
+        var usuario = _repositorio.GetByNombreUsuario(normalizedUserName);
 
         if (usuario == null || !usuario.Estado || usuario.PasswordHash == null)
             return Task.FromResult<UsuarioDto?>(null);
 
-        if (!VerifyPassword(password, usuario.PasswordHash))
+        if (!VerifyPassword(normalizedPassword, usuario.PasswordHash))
             return Task.FromResult<UsuarioDto?>(null);
 
         return Task.FromResult<UsuarioDto?>(MapToDto(usuario));
     }
 
+    public Task CambiarPasswordAsync(int usuarioId, string passwordActual, string passwordNueva, string passwordConfirmacion)
+    {
+        var usuario = _repositorio.GetById(usuarioId);
+
+        if (usuario == null || !usuario.Estado || string.IsNullOrWhiteSpace(usuario.PasswordHash))
+        {
+            throw new InvalidOperationException("Usuario no encontrado o sin credenciales activas.");
+        }
+
+        var actual = passwordActual?.Trim() ?? string.Empty;
+        var nueva = passwordNueva?.Trim() ?? string.Empty;
+        var confirmacion = passwordConfirmacion?.Trim() ?? string.Empty;
+
+        if (!VerifyPassword(actual, usuario.PasswordHash))
+        {
+            throw new InvalidOperationException("La contrasena actual no es correcta.");
+        }
+
+        if (!string.Equals(nueva, confirmacion, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("La nueva contrasena y su confirmacion no coinciden.");
+        }
+
+        var policyResult = ValidatePasswordPolicy(nueva);
+        if (!policyResult.IsValid)
+        {
+            throw new InvalidOperationException(policyResult.ErrorMessage);
+        }
+
+        if (VerifyPassword(nueva, usuario.PasswordHash))
+        {
+            throw new InvalidOperationException("La nueva contrasena no puede ser igual a la contrasena actual.");
+        }
+
+        usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(nueva);
+        usuario.FechaActualizacion = DateTime.UtcNow;
+
+        _repositorio.Update(usuario);
+        return Task.CompletedTask;
+    }
+
     private static bool VerifyPassword(string password, string storedHash)
     {
+        if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(storedHash))
+            return false;
+
+        var normalizedHash = IsTemporaryPasswordHash(storedHash)
+            ? storedHash[TemporaryHashPrefix.Length..]
+            : storedHash;
+
         try
         {
-            if (BCrypt.Net.BCrypt.Verify(password, storedHash))
+            if (BCrypt.Net.BCrypt.Verify(password, normalizedHash))
                 return true;
         }
         catch
@@ -140,7 +233,7 @@ public class UsuarioService : IUsuarioService
             // Hash legado o formato no compatible con BCrypt.
         }
 
-        return string.Equals(ComputeSha256(password), storedHash, StringComparison.Ordinal);
+        return string.Equals(ComputeSha256(password), normalizedHash, StringComparison.Ordinal);
     }
 
     private static string ComputeSha256(string password)
@@ -162,8 +255,52 @@ public class UsuarioService : IUsuarioService
             Email = usuario.Email,
             NombreUsuario = usuario.NombreUsuario,
             Rol = usuario.Rol,
-            Estado = usuario.Estado
+            Estado = usuario.Estado,
+            DebeCambiarPassword = IsTemporaryPasswordHash(usuario.PasswordHash)
         };
+    }
+
+    private static (bool IsValid, string ErrorMessage) ValidatePasswordPolicy(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return (false, "La nueva contrasena es obligatoria.");
+        }
+
+        if (password.Length < 8)
+        {
+            return (false, "La contrasena debe tener al menos 8 caracteres.");
+        }
+
+        if (!Regex.IsMatch(password, "[A-Z]"))
+        {
+            return (false, "La contrasena debe incluir al menos una letra mayuscula.");
+        }
+
+        if (!Regex.IsMatch(password, "[a-z]"))
+        {
+            return (false, "La contrasena debe incluir al menos una letra minuscula.");
+        }
+
+        if (!Regex.IsMatch(password, "[0-9]"))
+        {
+            return (false, "La contrasena debe incluir al menos un numero.");
+        }
+
+        if (!Regex.IsMatch(password, "[^a-zA-Z0-9]"))
+        {
+            return (false, "La contrasena debe incluir al menos un caracter especial.");
+        }
+
+        return (true, string.Empty);
+    }
+
+    private const string TemporaryHashPrefix = "TEMP$";
+
+    private static bool IsTemporaryPasswordHash(string? passwordHash)
+    {
+        return !string.IsNullOrWhiteSpace(passwordHash)
+            && passwordHash.StartsWith(TemporaryHashPrefix, StringComparison.Ordinal);
     }
 
     private static string NormalizeDisplayName(string? value)
@@ -179,5 +316,18 @@ public class UsuarioService : IUsuarioService
 
         var textInfo = CultureInfo.GetCultureInfo("es-ES").TextInfo;
         return textInfo.ToTitleCase(textInfo.ToLower(compactado));
+    }
+
+    private static bool ShouldAutoProvisionCredentials(string? rol)
+    {
+        if (string.IsNullOrWhiteSpace(rol))
+        {
+            return false;
+        }
+
+        return string.Equals(rol, "Usuario", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol, "Lector", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol, "Bibliotecario", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase);
     }
 }
