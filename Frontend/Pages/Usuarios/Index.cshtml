@@ -112,48 +112,72 @@
 
             <div id="mensajeValidacionUsuario" class="text-error-summary" style="display:none;"></div>
 
-            <input asp-for="NuevoUsuario.Nombres"
-                   class="input-form"
-                   id="Nombres"
-                   placeholder="Nombres"
-                   required />
-            <div id="errorNombresUsuario" class="field-error"></div>
+            <div class="usuario-form-grid">
+                <div class="field-group">
+                    <label for="CI">Carnet de identidad <span class="required-mark">*</span></label>
+                    <input asp-for="NuevoUsuario.CI" class="input-form" id="CI" placeholder="Ej: 12345678" />
+                    <div id="errorCiUsuario" class="field-error"></div>
+                </div>
 
-            <input asp-for="NuevoUsuario.CI" class="input-form" id="CI" placeholder="Carnet de identidad (sin complemento)" />
-            <div id="errorCiUsuario" class="field-error"></div>
-            <input id="Complemento" name="Complemento" class="input-form" placeholder="Complemento (opcional)" />
+                <div class="field-group">
+                    <label for="Complemento">Complemento</label>
+                    <input id="Complemento" name="Complemento" class="input-form" placeholder="Ej: 1P" />
+                </div>
 
-            <input asp-for="NuevoUsuario.PrimerApellido"
-                   class="input-form"
-                   id="PrimerApellido"
-                   placeholder="Primer apellido"
-                   required />
-            <div id="errorPrimerApellidoUsuario" class="field-error"></div>
+                <div class="field-group field-span-2">
+                    <label for="Nombres">Nombres <span class="required-mark">*</span></label>
+                    <input asp-for="NuevoUsuario.Nombres"
+                           class="input-form"
+                           id="Nombres"
+                           placeholder="Nombre completo"
+                           required />
+                    <div id="errorNombresUsuario" class="field-error"></div>
+                </div>
 
-            <input asp-for="NuevoUsuario.SegundoApellido"
-                   class="input-form"
-                   id="SegundoApellido"
-                   placeholder="Segundo apellido" />
+                <div class="field-group">
+                    <label for="PrimerApellido">Primer apellido <span class="required-mark">*</span></label>
+                    <input asp-for="NuevoUsuario.PrimerApellido"
+                           class="input-form"
+                           id="PrimerApellido"
+                           placeholder="Primer apellido"
+                           required />
+                    <div id="errorPrimerApellidoUsuario" class="field-error"></div>
+                </div>
 
-            <input asp-for="NuevoUsuario.Email"
-                   class="input-form"
-                   id="Email"
-                   type="email"
-                   placeholder="Correo electrónico"
-                   required />
-            <div id="errorEmailUsuario" class="field-error"></div>
+                <div class="field-group">
+                    <label for="SegundoApellido">Segundo apellido</label>
+                    <input asp-for="NuevoUsuario.SegundoApellido"
+                           class="input-form"
+                           id="SegundoApellido"
+                           placeholder="Opcional" />
+                </div>
 
-            @if (Model.IsAdmin)
-            {
-                <select asp-for="RolNuevoUsuario"
-                        class="input-form"
-                        id="RolNuevoUsuario">
-                    <option value="@Roles.Bibliotecario">Bibliotecario</option>
-                    <option value="@Roles.Admin">Admin</option>
-                    <option value="@Roles.Lector">Lector</option>
-                </select>
-                <div id="errorRolUsuario" class="field-error"></div>
-            }
+                <div class="field-group @(Model.IsAdmin ? string.Empty : "field-span-2")">
+                    <label for="Email">Correo electrónico <span class="required-mark">*</span></label>
+                    <input asp-for="NuevoUsuario.Email"
+                           class="input-form"
+                           id="Email"
+                           type="email"
+                           placeholder="usuario@correo.com"
+                           required />
+                    <div id="errorEmailUsuario" class="field-error"></div>
+                </div>
+
+                @if (Model.IsAdmin)
+                {
+                    <div class="field-group">
+                        <label for="RolNuevoUsuario">Rol <span class="required-mark">*</span></label>
+                        <select asp-for="RolNuevoUsuario"
+                                class="input-form"
+                                id="RolNuevoUsuario">
+                            <option value="@Roles.Bibliotecario">Bibliotecario</option>
+                            <option value="@Roles.Admin">Admin</option>
+                            <option value="@Roles.Lector">Lector</option>
+                        </select>
+                        <div id="errorRolUsuario" class="field-error"></div>
+                    </div>
+                }
+            </div>
 
                  <input asp-for="NuevoUsuario.NombreUsuario" id="NombreUsuario" type="hidden" />
                  <input asp-for="NuevoUsuario.PasswordHash" id="PasswordHash" type="hidden" />
