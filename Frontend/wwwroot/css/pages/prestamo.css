@@ -511,6 +511,17 @@
     white-space: nowrap;
 }
 
+.tabla-ejemplar .th-numero,
+.tabla-ejemplar .td-numero {
+    width: 44px;
+    text-align: center;
+}
+
+.tabla-ejemplar .td-numero {
+    color: #9ca3af;
+    font-weight: 700;
+}
+
 .tabla-ejemplar td {
     color: #d1d5db;
     padding: 7px 8px;

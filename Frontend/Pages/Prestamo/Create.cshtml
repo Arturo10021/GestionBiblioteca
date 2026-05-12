@@ -193,6 +193,7 @@
                             <table id="tabla-ejemplares" class="tabla-ejemplar">
                                 <thead>
                                     <tr>
+                                        <th class="th-numero">N°</th>
                                         <th>Ejemplar</th>
                                         <th>Conservación</th>
                                         <th>Observaciones de salida</th>
@@ -902,6 +903,7 @@
             ejemplaresSeleccionados.forEach((ejemplar, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td class="td-numero">${idx + 1}</td>
                     <td>
                         <strong>${ejemplar.label}</strong>
                     </td>
