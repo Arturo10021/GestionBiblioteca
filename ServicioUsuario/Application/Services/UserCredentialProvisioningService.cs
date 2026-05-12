@@ -10,10 +10,11 @@ namespace ServicioUsuario.Application.Services;
 
 public class UserCredentialProvisioningService : IUserCredentialProvisioningService
 {
-    private const int TemporaryPasswordLength = 6;
+    private const int TemporaryPasswordLength = 10;
     private const int MaxUserNameLength = 50;
     private const string Sha2Algorithm = "SHA-256";
-    private const string PasswordCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*_-";
+    private const string TemporaryHashPrefix = "TEMP$";
+    private const string PasswordCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 
     private readonly UsuarioRepository _usuarioRepositorio;
     private readonly IEmailSender _emailSender;
@@ -38,7 +39,7 @@ public class UserCredentialProvisioningService : IUserCredentialProvisioningServ
 
         var nombreUsuario = GenerarNombreUsuarioUnico(usuario.Nombres, usuario.PrimerApellido, usuario.SegundoApellido);
         var passwordTemporal = GenerarPasswordTemporalSegura();
-        var hashPassword = BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
+        var hashPassword = TemporaryHashPrefix + BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
 
         usuario.NombreUsuario = nombreUsuario;
         usuario.PasswordHash = hashPassword;
@@ -52,7 +53,7 @@ public class UserCredentialProvisioningService : IUserCredentialProvisioningServ
                 "Tu usuario fue creado correctamente.\n" +
                 $"Nombre de usuario: {nombreUsuario}\n" +
                 $"Contrasena temporal: {passwordTemporal}\n\n" +
-                "Por seguridad, cambia tu contrasena al iniciar sesion.\n"
+                "Por seguridad, en tu primer inicio de sesion se te pedira cambiar la contrasena.\n"
         };
 
         var emailSent = true;

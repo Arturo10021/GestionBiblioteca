@@ -43,10 +43,50 @@ public class LoginModel : PageModel
         HttpContext.Session.SetString(SessionKeys.UsuarioId, UsuarioDto.UsuarioId.ToString());
         HttpContext.Session.SetString(SessionKeys.NombreUsuario, UsuarioDto.NombreUsuario ?? string.Empty);
         HttpContext.Session.SetString(SessionKeys.Rol, UsuarioDto.Rol);
+        HttpContext.Session.SetString(SessionKeys.DebeCambiarPassword, UsuarioDto.DebeCambiarPassword ? "true" : "false");
 
         Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
         Response.Headers["Pragma"] = "no-cache";
         Response.Headers["Expires"] = "0";
+
+        return Redirect("/");
+    }
+
+    public async Task<IActionResult> OnPostCambiarPasswordModalAsync(
+        string passwordActualModal,
+        string passwordNuevaModal,
+        string passwordConfirmacionModal,
+        string? returnUrl,
+        CancellationToken cancellationToken)
+    {
+        var usuarioSesion = HttpContext.Session.GetString(SessionKeys.UsuarioId);
+
+        if (!int.TryParse(usuarioSesion, out var usuarioId))
+        {
+            return Redirect("/");
+        }
+
+        var resultado = await _usuarioServicio.CambiarPasswordAsync(
+            usuarioId,
+            passwordActualModal,
+            passwordNuevaModal,
+            passwordConfirmacionModal,
+            cancellationToken);
+
+        if (resultado.IsFailure)
+        {
+            TempData["ChangePasswordError"] = resultado.Error.Message;
+        }
+        else
+        {
+            HttpContext.Session.SetString(SessionKeys.DebeCambiarPassword, "false");
+            TempData["ChangePasswordOk"] = "Contrasena actualizada correctamente.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
 
         return Redirect("/");
     }

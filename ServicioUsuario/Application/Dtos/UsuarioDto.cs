@@ -11,6 +11,14 @@ public class UsuarioDto
     public string? NombreUsuario { get; set; }
     public string Rol { get; set; } = string.Empty;
     public bool Estado { get; set; }
+    public bool DebeCambiarPassword { get; set; }
+}
+
+public class CambiarPasswordDto
+{
+    public string PasswordActual { get; set; } = string.Empty;
+    public string PasswordNueva { get; set; } = string.Empty;
+    public string PasswordConfirmacion { get; set; } = string.Empty;
 }
 
 public class CreateUsuarioDto

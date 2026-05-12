@@ -15,12 +15,15 @@ builder.Configuration.AddJsonFile("emailsettings.json", optional: true, reloadOn
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(EmailSettings.SectionName));
 
 // Repositorio
 builder.Services.AddSingleton<UsuarioRepository>();
 
-// Email sender
-builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+// Email sender (via factory: SMTP, Dev, or HTTP based on config)
+builder.Services.AddSingleton<IEmailSender>(sp => EmailSenderFactory.Create(sp));
 
 // Servicios
 builder.Services.AddSingleton<IUserCredentialProvisioningService, UserCredentialProvisioningService>();

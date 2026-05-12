@@ -112,13 +112,15 @@ public class UsuarioRepository : IRepository<Usuario, int>
         Usuario? usuario = null;
         try
         {
+            var normalizedUserName = nombreUsuario?.Trim() ?? string.Empty;
+
             using (var connection = (MySqlConnection)ConfigurationSingleton.Instancia.GetConnection())
             {
                 connection.Open();
-                string query = "SELECT * FROM usuario WHERE NombreUsuario = @NombreUsuario LIMIT 1;";
+                string query = "SELECT * FROM usuario WHERE LOWER(TRIM(NombreUsuario)) = LOWER(TRIM(@NombreUsuario)) LIMIT 1;";
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@NombreUsuario", nombreUsuario);
+                    command.Parameters.AddWithValue("@NombreUsuario", normalizedUserName);
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
