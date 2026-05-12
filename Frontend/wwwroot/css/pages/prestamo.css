@@ -258,6 +258,11 @@
     margin: 0;
 }
 
+.required-mark {
+    color: #f87171;
+    font-weight: 800;
+}
+
 .field-help {
     color: #9ca3af;
     font-size: 10px;
@@ -504,6 +509,17 @@
     font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
+}
+
+.tabla-ejemplar .th-numero,
+.tabla-ejemplar .td-numero {
+    width: 44px;
+    text-align: center;
+}
+
+.tabla-ejemplar .td-numero {
+    color: #9ca3af;
+    font-weight: 700;
 }
 
 .tabla-ejemplar td {
