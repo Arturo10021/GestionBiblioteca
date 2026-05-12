@@ -258,6 +258,11 @@
     margin: 0;
 }
 
+.required-mark {
+    color: #f87171;
+    font-weight: 800;
+}
+
 .field-help {
     color: #9ca3af;
     font-size: 10px;
