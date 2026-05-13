@@ -327,7 +327,6 @@ public class UsuarioService : IUsuarioService
         }
 
         return string.Equals(rol, "Usuario", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(rol, "Lector", StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, "Bibliotecario", StringComparison.OrdinalIgnoreCase)
             || string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase);
     }
