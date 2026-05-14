@@ -9,7 +9,7 @@
 
     <h1>Reporte - Libros Más Prestados</h1>
 
-    <form method="get" class="mb-4">
+    <form method="get" class="mb-4 d-flex gap-2 align-items-center flex-wrap">
 
         <label>Fecha Inicio</label>
         <input type="date" asp-for="FechaInicio" />
@@ -17,47 +17,76 @@
         <label>Fecha Fin</label>
         <input type="date" asp-for="FechaFin" />
 
-        <button type="submit">
+        <button type="submit" class="btn btn-primary">
             Generar Reporte
         </button>
 
-        <button type="button" onclick="descargarPDF()">
+        <button type="button" class="btn btn-danger" onclick="descargarPDF()">
             Descargar PDF
         </button>
 
-        <button type="button" onclick="descargarExcel()">
+        <button type="button" class="btn btn-success" onclick="descargarExcel()">
             Descargar Excel
         </button>
 
     </form>
 
-    <div id="reporte-container">
+    <div id="reporte-container" style="background:#e5e7eb; color:#000000; padding:20px; border-radius:8px; position:relative; overflow:hidden; box-shadow:0 18px 45px rgba(0,0,0,.35);">
 
-        <table class="table table-bordered">
+        <img id="watermark-logo"
+             src="/assets/images/blackLogoR.png"
+             alt="Marca de agua"
+             style="display:none; position:absolute; top:52%; left:50%; width:560px; opacity:0.075; transform:translate(-50%, -50%) rotate(-18deg); z-index:0;" />
 
-            <thead>
-                <tr>
-                    <th>Libro</th>
-                    <th>Cantidad de préstamos</th>
-                </tr>
-            </thead>
+        <div id="reporte-content" style="position:relative; z-index:1;">
 
-            <tbody>
-                @foreach (var item in Model.Reporte)
-                {
+            <header style="display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #222; padding-bottom:10px; margin-bottom:15px;">
+                <div>
+                    <h2 style="margin:0; font-weight:700;">Reporte de Libros Más Prestados</h2>
+                    <p style="margin:0;">Biblioteca StarBook</p>
+                </div>
+
+                <img src="/assets/images/blackLogoR.png" alt="Logo" style="height:60px;" />
+            </header>
+
+            <section style="margin-bottom:15px;">
+                <strong>Filtros aplicados:</strong>
+                <span>
+                    Fecha inicio: @(Model.FechaInicio?.ToString("dd/MM/yyyy") ?? "Todos") |
+                    Fecha fin: @(Model.FechaFin?.ToString("dd/MM/yyyy") ?? "Todos")
+                </span>
+            </section>
+
+            <table class="table table-bordered">
+
+                <thead>
                     <tr>
-                        <td>@item.TituloLibro</td>
-                        <td>@item.CantidadPrestamos</td>
+                        <th>Libro</th>
+                        <th>Cantidad de préstamos</th>
                     </tr>
-                }
-            </tbody>
+                </thead>
 
-        </table>
+                <tbody>
+                    @foreach (var item in Model.Reporte)
+                    {
+                        <tr>
+                            <td>@item.TituloLibro</td>
+                            <td>@item.CantidadPrestamos</td>
+                        </tr>
+                    }
+                </tbody>
 
-        <hr />
+            </table>
 
-        <div style="height:350px; max-width:900px; margin:30px auto;">
-            <canvas id="graficoLibros"></canvas>
+            <div style="height:350px; max-width:900px; margin:30px auto;">
+                <canvas id="graficoLibros"></canvas>
+            </div>
+
+            <footer style="border-top:2px solid #222; margin-top:15px; padding-top:10px; display:flex; justify-content:space-between;">
+                <span>Total de libros listados: @Model.Reporte.Count</span>
+                <span>Total de préstamos: @Model.Reporte.Sum(x => x.CantidadPrestamos)</span>
+            </footer>
+
         </div>
 
     </div>
@@ -86,7 +115,10 @@
                 labels: labels,
                 datasets: [{
                     label: 'Cantidad de préstamos',
-                    data: data
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.65)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -98,14 +130,26 @@
         async function descargarPDF() {
             const { jsPDF } = window.jspdf;
             const elemento = document.getElementById('reporte-container');
+            const watermark = document.getElementById('watermark-logo');
+
+            const fondoOriginal = elemento.style.background;
+            const sombraOriginal = elemento.style.boxShadow;
+
+            elemento.style.background = '#ffffff';
+            elemento.style.boxShadow = 'none';
+            watermark.style.display = 'block';
 
             const canvas = await html2canvas(elemento, {
                 scale: 2,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                useCORS: true
             });
 
-            const imgData = canvas.toDataURL('image/png');
+            watermark.style.display = 'none';
+            elemento.style.background = fondoOriginal;
+            elemento.style.boxShadow = sombraOriginal;
 
+            const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
 
             const margen = 10;
@@ -123,7 +167,7 @@
 
             @foreach (var item in Model.Reporte)
             {
-                    @:datos.push(['@item.TituloLibro.Replace("'", "\\'")', @item.CantidadPrestamos]);
+                @:datos.push(['@item.TituloLibro.Replace("'", "\\'")', @item.CantidadPrestamos]);
             }
 
             const hoja = XLSX.utils.aoa_to_sheet(datos);
